@@ -19,7 +19,7 @@ import styles from "./Navigation.module.css";
 export function Navigation() {
   const pathname = usePathname();
   const chainId = useChainId();
-  const { address, isConnected, connector: activeConnector } = useAccount();
+  const { address, isConnected } = useAccount();
   const { connect, connectors, isPending } = useConnect();
   const { disconnect } = useDisconnect();
   const { switchChain } = useSwitchChain();
@@ -127,7 +127,7 @@ export function Navigation() {
 
   const handleDisconnect = (e: React.MouseEvent) => {
     e.stopPropagation();
-    disconnect({ connector: activeConnector });
+    disconnect();
     setShowWalletMenu(false);
   };
 
@@ -225,15 +225,29 @@ export function Navigation() {
               </button>
             </div>
             <div className={styles.connectorList}>
-              {connectors.map((connector) => (
-                <button
-                  key={connector.uid}
-                  onClick={() => {
-                    connect({ connector });
-                    setShowConnectModal(false);
-                  }}
-                  className={styles.connectorButton}
-                >
+              {connectors.length === 0 ? (
+                <div className={styles.emptyConnectors}>
+                  <p>No wallets available</p>
+                  <p className={styles.emptyHint}>Please install a wallet extension or use the Farcaster app</p>
+                </div>
+              ) : (
+                connectors.map((connector) => (
+                  <button
+                    key={connector.uid}
+                    onClick={() => {
+                      try {
+                        connect({ 
+                          connector,
+                          chainId: baseSepolia.id,
+                        });
+                        setShowConnectModal(false);
+                      } catch (error) {
+                        console.error('Failed to connect wallet:', error);
+                      }
+                    }}
+                    className={styles.connectorButton}
+                    disabled={isPending}
+                  >
                   <span className={styles.connectorInfo}>
                     {connector.icon ? (
                       // eslint-disable-next-line @next/next/no-img-element
@@ -248,8 +262,9 @@ export function Navigation() {
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
                   </svg>
-                </button>
-              ))}
+                  </button>
+                ))
+              )}
             </div>
             <p className={styles.modalFooter}>
               By connecting, you agree to the terms of service.

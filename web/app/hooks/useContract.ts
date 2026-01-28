@@ -24,6 +24,7 @@ export function useIsRegisteredArtist(address?: `0x${string}`) {
     abi: MOLOTOV_NFT_ABI,
     functionName: 'registeredArtists',
     args: address ? [address] : undefined,
+    chainId: TARGET_CHAIN_ID,
     query: {
       enabled: !!contractAddress && !!address,
     },
@@ -39,6 +40,7 @@ export function useArtistProfile(address?: `0x${string}`) {
     abi: MOLOTOV_NFT_ABI,
     functionName: 'getArtistProfile',
     args: address ? [address] : undefined,
+    chainId: TARGET_CHAIN_ID,
     query: {
       enabled: !!contractAddress && !!address,
     },
@@ -54,6 +56,7 @@ export function useArtwork(tokenId?: bigint) {
     abi: MOLOTOV_NFT_ABI,
     functionName: 'getArtwork',
     args: tokenId !== undefined ? [tokenId] : undefined,
+    chainId: TARGET_CHAIN_ID,
     query: {
       enabled: !!contractAddress && tokenId !== undefined,
     },
@@ -68,6 +71,7 @@ export function useArtworksForSale() {
     address: contractAddress || undefined,
     abi: MOLOTOV_NFT_ABI,
     functionName: 'getArtworksForSale',
+    chainId: TARGET_CHAIN_ID,
     query: {
       enabled: !!contractAddress,
     },
@@ -82,6 +86,7 @@ export function useAllTokenIds() {
     address: contractAddress || undefined,
     abi: MOLOTOV_NFT_ABI,
     functionName: 'getAllTokenIds',
+    chainId: TARGET_CHAIN_ID,
     query: {
       enabled: !!contractAddress,
     },
@@ -97,6 +102,7 @@ export function useArtistTokens(address?: `0x${string}`) {
     abi: MOLOTOV_NFT_ABI,
     functionName: 'getArtistTokens',
     args: address ? [address] : undefined,
+    chainId: TARGET_CHAIN_ID,
     query: {
       enabled: !!contractAddress && !!address,
     },
@@ -111,6 +117,7 @@ export function useAllArtists() {
     address: contractAddress || undefined,
     abi: MOLOTOV_NFT_ABI,
     functionName: 'getAllArtists',
+    chainId: TARGET_CHAIN_ID,
     query: {
       enabled: !!contractAddress,
     },
@@ -140,6 +147,7 @@ export function useTokenOwner(tokenId?: bigint) {
     abi: MOLOTOV_NFT_ABI,
     functionName: 'ownerOf',
     args: tokenId !== undefined ? [tokenId] : undefined,
+    chainId: TARGET_CHAIN_ID,
     query: {
       enabled: !!contractAddress && tokenId !== undefined,
     },

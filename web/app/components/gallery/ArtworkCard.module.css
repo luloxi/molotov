@@ -1,0 +1,135 @@
+.card {
+  display: block;
+  background: var(--card-bg, #1a1a2e);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  text-decoration: none;
+  color: inherit;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+}
+
+.imageContainer {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  background: var(--skeleton-bg, #2a2a4e);
+  overflow: hidden;
+}
+
+.skeleton {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    var(--skeleton-bg, #2a2a4e) 0%,
+    var(--skeleton-shine, #3a3a5e) 50%,
+    var(--skeleton-bg, #2a2a4e) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.image.loaded {
+  opacity: 1;
+}
+
+.errorPlaceholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--error-bg, #2a1a1a);
+  color: var(--error-text, #ff6b6b);
+  font-size: 0.875rem;
+}
+
+.gifBadge,
+.forSaleBadge {
+  position: absolute;
+  top: 12px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.gifBadge {
+  right: 12px;
+  background: rgba(138, 43, 226, 0.9);
+  color: white;
+}
+
+.forSaleBadge {
+  left: 12px;
+  background: rgba(34, 197, 94, 0.9);
+  color: white;
+}
+
+.info {
+  padding: 16px;
+}
+
+.title {
+  margin: 0 0 4px;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text-primary, #fff);
+}
+
+.artist {
+  margin: 0 0 12px;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+  color: var(--text-secondary, #888);
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.price {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--accent, #6366f1);
+}
+
+.notForSale {
+  font-size: 0.875rem;
+  color: var(--text-muted, #666);
+}
+
+.edition {
+  font-size: 0.75rem;
+  color: var(--text-secondary, #888);
+  background: var(--edition-bg, rgba(255, 255, 255, 0.1));
+  padding: 2px 8px;
+  border-radius: 12px;
+}

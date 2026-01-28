@@ -1,183 +1,191 @@
 # Molotov Gallery
 
-Una galería NFT descentralizada construida en Base, integrada como mini app de Farcaster.
+A decentralized NFT gallery built on Base, integrated as a Farcaster mini app.
 
-## Características
+## Features
 
-- **Smart Contracts NFT** - Contratos ERC721 personalizados con soporte para:
-  - Metadata completa en IPFS
-  - Sistema de regalías (royalties)
-  - Ediciones múltiples
-  - Listado y venta directa
+- **NFT Smart Contracts** - Custom ERC721 contracts with support for:
+  - Complete metadata on IPFS
+  - Royalty system
+  - Multiple editions
+  - Direct listing and sales
 
-- **Perfiles de Artistas** - Sistema completo de perfiles vinculados a las obras:
-  - Registro y verificación de artistas
-  - Links a redes sociales
-  - Estadísticas de ventas
+- **Artist Profiles** - Complete profile system linked to artworks:
+  - Artist registration and verification
+  - Social media links
+  - Sales statistics
 
-- **Almacenamiento IPFS** - Integración con Pinata para:
-  - Almacenamiento descentralizado de imágenes/GIFs
-  - Metadata JSON siguiendo estándares NFT
+- **IPFS Storage** - Pinata integration for:
+  - Decentralized image/GIF storage
+  - JSON metadata following NFT standards
 
-- **Pagos Crypto** - Pasarela de pagos funcional:
-  - Compra directa de artworks
-  - Soporte para ETH en Base
+- **Crypto Payments** - Functional payment gateway:
+  - Direct artwork purchases
+  - ETH support on Base
 
-- **Monitor de Transacciones** - Feed en tiempo real:
-  - Eventos de minteo
-  - Compras
-  - Nuevos artistas
+- **Transaction Monitor** - Real-time feed:
+  - Minting events
+  - Purchases
+  - New artists
 
-## Stack Tecnológico
+## Tech Stack
 
 - **Frontend**: Next.js 15, React 19, TypeScript
 - **Blockchain**: Base (L2), Solidity 0.8.24
 - **Smart Contracts**: Foundry, OpenZeppelin
 - **Web3**: wagmi, viem
-- **Almacenamiento**: IPFS via Pinata
+- **Storage**: IPFS via Pinata
 - **Mini App**: Farcaster SDK
 
-## Estructura del Proyecto
+## Project Structure
 
 ```
 molotov/
-├── app/                    # Next.js App Router
-│   ├── components/         # Componentes React
-│   │   ├── artist/         # Componentes de artistas
-│   │   ├── gallery/        # Componentes de galería
-│   │   ├── mint/           # Formulario de minteo
-│   │   └── transactions/   # Feed de transacciones
-│   ├── hooks/              # Custom hooks (wagmi)
-│   ├── services/           # Servicios (IPFS, contratos)
-│   ├── types/              # Tipos TypeScript
-│   ├── gallery/            # Página de galería
-│   ├── mint/               # Página de minteo
-│   ├── artwork/[id]/       # Página de artwork individual
-│   └── artist/[address]/   # Página de perfil de artista
-├── contracts/              # Smart Contracts (Foundry)
-│   ├── src/                # Contratos Solidity
-│   ├── script/             # Scripts de deployment
-│   └── test/               # Tests
-└── public/                 # Assets estáticos
+├── web/                        # Next.js Web Application
+│   ├── app/                    # Next.js App Router
+│   │   ├── components/         # React components
+│   │   │   ├── artist/         # Artist components
+│   │   │   ├── gallery/        # Gallery components
+│   │   │   ├── mint/           # Minting form
+│   │   │   └── transactions/   # Transaction feed
+│   │   ├── hooks/              # Custom hooks (wagmi)
+│   │   ├── services/           # Services (IPFS, contracts)
+│   │   ├── types/              # TypeScript types
+│   │   ├── gallery/            # Gallery page
+│   │   ├── mint/               # Minting page
+│   │   ├── artwork/[id]/       # Individual artwork page
+│   │   └── artist/[address]/   # Artist profile page
+│   ├── public/                 # Static assets
+│   ├── package.json
+│   └── tsconfig.json
+│
+├── smart-contracts/            # Foundry Smart Contracts
+│   ├── src/                    # Solidity contracts
+│   ├── script/                 # Deployment scripts
+│   ├── test/                   # Contract tests
+│   └── lib/                    # Foundry dependencies
+│
+├── .gitignore
+└── README.md
 ```
 
-## Instalación
+## Installation
 
-### Requisitos
+### Requirements
 
 - Node.js 18+
 - pnpm/npm/yarn
-- Foundry (para contratos)
+- Foundry (for contracts)
 
 ### Setup
 
-1. **Clonar e instalar dependencias**
+1. **Clone and install dependencies**
 
 ```bash
 git clone <repo-url>
-cd molotov
+cd molotov/web
 npm install
 ```
 
-2. **Configurar variables de entorno**
+2. **Configure environment variables**
 
 ```bash
 cp .env.example .env.local
 ```
 
-Editar `.env.local` con tus claves:
-- `NEXT_PUBLIC_PINATA_JWT` - JWT de Pinata para IPFS
-- `PRIVATE_KEY` - Clave privada para deployment (solo desarrollo)
-- `BASESCAN_API_KEY` - API key de Basescan para verificación
+Edit `.env.local` with your keys:
+- `NEXT_PUBLIC_PINATA_JWT` - Pinata JWT for IPFS
+- `PRIVATE_KEY` - Private key for deployment (development only)
+- `BASESCAN_API_KEY` - Basescan API key for verification
 
-3. **Compilar contratos**
-
-```bash
-npm run forge:build
-```
-
-4. **Ejecutar tests**
+3. **Start development server**
 
 ```bash
-npm run forge:test
-```
-
-5. **Iniciar desarrollo**
-
-```bash
+cd web
 npm run dev
 ```
 
-## Deployment de Contratos
+## Smart Contracts
 
-### Testnet (Base Sepolia)
+### Building & Testing
 
 ```bash
-# Configurar variables de entorno
+cd smart-contracts
+forge build
+forge test
+```
+
+### Deployment
+
+#### Testnet (Base Sepolia)
+
+```bash
+cd smart-contracts
+
+# Configure environment variables
 export BASE_SEPOLIA_RPC_URL=https://sepolia.base.org
-export PRIVATE_KEY=tu_clave_privada
-export BASESCAN_API_KEY=tu_api_key
+export PRIVATE_KEY=your_private_key
+export BASESCAN_API_KEY=your_api_key
 
 # Deploy
-npm run forge:deploy:sepolia
+forge script script/DeployMolotov.s.sol --rpc-url $BASE_SEPOLIA_RPC_URL --broadcast --verify
 ```
 
-### Mainnet (Base)
+#### Mainnet (Base)
 
 ```bash
-export BASE_RPC_URL=https://mainnet.base.org
-export PRIVATE_KEY=tu_clave_privada
-export BASESCAN_API_KEY=tu_api_key
+cd smart-contracts
 
-npm run forge:deploy:mainnet
+export BASE_RPC_URL=https://mainnet.base.org
+export PRIVATE_KEY=your_private_key
+export BASESCAN_API_KEY=your_api_key
+
+forge script script/DeployMolotov.s.sol --rpc-url $BASE_RPC_URL --broadcast --verify
 ```
 
-Después del deployment, actualizar las direcciones de contrato en:
-- `app/types/index.ts` - `CONTRACT_ADDRESSES`
-- `.env.local` - Variables de entorno
-
-## Uso
-
-### Como Artista
-
-1. Conectar wallet
-2. Ir a `/mint` y registrarse como artista
-3. Completar perfil con nombre, bio e imagen
-4. Crear artworks subiendo imágenes/GIFs
-5. Establecer precio y regalías
-
-### Como Coleccionista
-
-1. Conectar wallet
-2. Explorar galería en `/gallery`
-3. Ver detalles de artworks
-4. Comprar directamente con ETH
-
-## Contratos
+After deployment, update contract addresses in:
+- `web/app/types/index.ts` - `CONTRACT_ADDRESSES`
 
 ### MolotovNFT.sol
 
-Contrato principal ERC721 con las siguientes características:
+Main ERC721 contract with the following features:
 
-- **Minteo**: Solo artistas registrados pueden mintear
-- **Marketplace**: Listado y compra directa integrados
-- **Regalías**: Soporte ERC2981 (hasta 10%)
-- **Metadata**: URI apuntando a IPFS
+- **Minting**: Only registered artists can mint
+- **Marketplace**: Integrated listing and direct purchase
+- **Royalties**: ERC2981 support (up to 10%)
+- **Metadata**: URI pointing to IPFS
 
-Funciones principales:
-- `registerArtist()` - Registrar como artista
-- `mintArtwork()` - Crear nuevo NFT
-- `purchaseArtwork()` - Comprar artwork
-- `updateArtworkListing()` - Actualizar precio/estado
+Main functions:
+- `registerArtist()` - Register as an artist
+- `mintArtwork()` - Create new NFT
+- `purchaseArtwork()` - Purchase artwork
+- `updateArtworkListing()` - Update price/status
 
-## API de IPFS
+## Usage
 
-El servicio de IPFS (`app/services/ipfs.ts`) proporciona:
+### As an Artist
 
-- `uploadFileToIPFS(file)` - Subir imagen/GIF
-- `uploadMetadataToIPFS(metadata)` - Subir metadata JSON
-- `getIPFSUrl(hash)` - Obtener URL del gateway
+1. Connect wallet
+2. Go to `/mint` and register as an artist
+3. Complete profile with name, bio, and image
+4. Create artworks by uploading images/GIFs
+5. Set price and royalties
 
-## Licencia
+### As a Collector
+
+1. Connect wallet
+2. Browse gallery at `/gallery`
+3. View artwork details
+4. Purchase directly with ETH
+
+## IPFS API
+
+The IPFS service (`web/app/services/ipfs.ts`) provides:
+
+- `uploadFileToIPFS(file)` - Upload image/GIF
+- `uploadMetadataToIPFS(metadata)` - Upload JSON metadata
+- `getIPFSUrl(hash)` - Get gateway URL
+
+## License
 
 MIT

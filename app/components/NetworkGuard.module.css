@@ -1,0 +1,62 @@
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  padding: 24px;
+}
+
+.card {
+  max-width: 400px;
+  padding: 32px;
+  background: var(--card-bg, #1a1a2e);
+  border-radius: 20px;
+  text-align: center;
+}
+
+.icon {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+  color: var(--warning, #fbbf24);
+}
+
+.card h2 {
+  margin: 0 0 12px;
+  font-size: 1.5rem;
+  color: var(--text-primary, #fff);
+}
+
+.card p {
+  margin: 0 0 8px;
+  color: var(--text-secondary, #888);
+  line-height: 1.5;
+}
+
+.currentNetwork {
+  font-size: 0.875rem;
+  color: var(--text-muted, #666);
+  margin-bottom: 24px !important;
+}
+
+.switchButton {
+  width: 100%;
+  padding: 14px 24px;
+  background: var(--accent, #6366f1);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.switchButton:hover:not(:disabled) {
+  background: var(--accent-hover, #4f46e5);
+}
+
+.switchButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

@@ -1,159 +1,183 @@
-# Waitlist Mini App Quickstart
+# Molotov Gallery
 
-This is a demo Mini App application built using OnchainKit and the Farcaster SDK. Build a waitlist sign-up mini app for your company that can be published to the Base app and Farcaster. 
+Una galería NFT descentralizada construida en Base, integrada como mini app de Farcaster.
 
-> [!IMPORTANT]  
-> Before interacting with this demo, please review our [disclaimer](#disclaimer) — there are **no official tokens or apps** associated with Cubey, Base, or Coinbase.
+## Características
 
-## Prerequisites
+- **Smart Contracts NFT** - Contratos ERC721 personalizados con soporte para:
+  - Metadata completa en IPFS
+  - Sistema de regalías (royalties)
+  - Ediciones múltiples
+  - Listado y venta directa
 
-Before getting started, make sure you have:
+- **Perfiles de Artistas** - Sistema completo de perfiles vinculados a las obras:
+  - Registro y verificación de artistas
+  - Links a redes sociales
+  - Estadísticas de ventas
 
-* Base app account
-* A [Farcaster](https://farcaster.xyz/) account
-* [Vercel](https://vercel.com/) account for hosting the application
-* [Coinbase Developer Platform](https://portal.cdp.coinbase.com/) Client API Key
+- **Almacenamiento IPFS** - Integración con Pinata para:
+  - Almacenamiento descentralizado de imágenes/GIFs
+  - Metadata JSON siguiendo estándares NFT
 
-## Getting Started
+- **Pagos Crypto** - Pasarela de pagos funcional:
+  - Compra directa de artworks
+  - Soporte para ETH en Base
 
-### 1. Clone this repository 
+- **Monitor de Transacciones** - Feed en tiempo real:
+  - Eventos de minteo
+  - Compras
+  - Nuevos artistas
 
-```bash
-git clone https://github.com/base/demos.git
+## Stack Tecnológico
+
+- **Frontend**: Next.js 15, React 19, TypeScript
+- **Blockchain**: Base (L2), Solidity 0.8.24
+- **Smart Contracts**: Foundry, OpenZeppelin
+- **Web3**: wagmi, viem
+- **Almacenamiento**: IPFS via Pinata
+- **Mini App**: Farcaster SDK
+
+## Estructura del Proyecto
+
+```
+molotov/
+├── app/                    # Next.js App Router
+│   ├── components/         # Componentes React
+│   │   ├── artist/         # Componentes de artistas
+│   │   ├── gallery/        # Componentes de galería
+│   │   ├── mint/           # Formulario de minteo
+│   │   └── transactions/   # Feed de transacciones
+│   ├── hooks/              # Custom hooks (wagmi)
+│   ├── services/           # Servicios (IPFS, contratos)
+│   ├── types/              # Tipos TypeScript
+│   ├── gallery/            # Página de galería
+│   ├── mint/               # Página de minteo
+│   ├── artwork/[id]/       # Página de artwork individual
+│   └── artist/[address]/   # Página de perfil de artista
+├── contracts/              # Smart Contracts (Foundry)
+│   ├── src/                # Contratos Solidity
+│   ├── script/             # Scripts de deployment
+│   └── test/               # Tests
+└── public/                 # Assets estáticos
 ```
 
-### 2. Install dependencies:
+## Instalación
+
+### Requisitos
+
+- Node.js 18+
+- pnpm/npm/yarn
+- Foundry (para contratos)
+
+### Setup
+
+1. **Clonar e instalar dependencias**
 
 ```bash
-cd demos/minikit/waitlist-mini-app-qs
+git clone <repo-url>
+cd molotov
 npm install
 ```
 
-### 3. Configure environment variables
-
-Create a `.env.local` file and add your environment variables:
+2. **Configurar variables de entorno**
 
 ```bash
-NEXT_PUBLIC_PROJECT_NAME="Your App Name"
-NEXT_PUBLIC_ONCHAINKIT_API_KEY=<Replace-WITH-YOUR-CDP-API-KEY>
-NEXT_PUBLIC_URL=
+cp .env.example .env.local
 ```
 
-### 4. Run locally:
+Editar `.env.local` con tus claves:
+- `NEXT_PUBLIC_PINATA_JWT` - JWT de Pinata para IPFS
+- `PRIVATE_KEY` - Clave privada para deployment (solo desarrollo)
+- `BASESCAN_API_KEY` - API key de Basescan para verificación
+
+3. **Compilar contratos**
+
+```bash
+npm run forge:build
+```
+
+4. **Ejecutar tests**
+
+```bash
+npm run forge:test
+```
+
+5. **Iniciar desarrollo**
 
 ```bash
 npm run dev
 ```
 
-## Customization
+## Deployment de Contratos
 
-### Update Manifest Configuration
-
-The `minikit.config.ts` file configures your manifest located at `app/.well-known/farcaster.json`.
-
-**Skip the `accountAssociation` object for now.**
-
-To personalize your app, change the `name`, `subtitle`, and `description` fields and add images to your `/public` folder. Then update their URLs in the file.
-
-## Deployment
-
-### 1. Deploy to Vercel
+### Testnet (Base Sepolia)
 
 ```bash
-vercel --prod
+# Configurar variables de entorno
+export BASE_SEPOLIA_RPC_URL=https://sepolia.base.org
+export PRIVATE_KEY=tu_clave_privada
+export BASESCAN_API_KEY=tu_api_key
+
+# Deploy
+npm run forge:deploy:sepolia
 ```
 
-You should have a URL deployed to a domain similar to: `https://your-vercel-project-name.vercel.app/`
-
-### 2. Update environment variables
-
-Add your production URL to your local `.env` file:
+### Mainnet (Base)
 
 ```bash
-NEXT_PUBLIC_PROJECT_NAME="Your App Name"
-NEXT_PUBLIC_ONCHAINKIT_API_KEY=<Replace-WITH-YOUR-CDP-API-KEY>
-NEXT_PUBLIC_URL=https://your-vercel-project-name.vercel.app/
+export BASE_RPC_URL=https://mainnet.base.org
+export PRIVATE_KEY=tu_clave_privada
+export BASESCAN_API_KEY=tu_api_key
+
+npm run forge:deploy:mainnet
 ```
 
-### 3. Upload environment variables to Vercel
+Después del deployment, actualizar las direcciones de contrato en:
+- `app/types/index.ts` - `CONTRACT_ADDRESSES`
+- `.env.local` - Variables de entorno
 
-Add environment variables to your production environment:
+## Uso
 
-```bash
-vercel env add NEXT_PUBLIC_PROJECT_NAME production
-vercel env add NEXT_PUBLIC_ONCHAINKIT_API_KEY production
-vercel env add NEXT_PUBLIC_URL production
-```
+### Como Artista
 
-## Account Association
+1. Conectar wallet
+2. Ir a `/mint` y registrarse como artista
+3. Completar perfil con nombre, bio e imagen
+4. Crear artworks subiendo imágenes/GIFs
+5. Establecer precio y regalías
 
-### 1. Sign Your Manifest
+### Como Coleccionista
 
-1. Navigate to [Farcaster Manifest tool](https://farcaster.xyz/~/developers/mini-apps/manifest)
-2. Paste your domain in the form field (ex: your-vercel-project-name.vercel.app)
-3. Click the `Generate account association` button and follow the on-screen instructions for signing with your Farcaster wallet
-4. Copy the `accountAssociation` object
+1. Conectar wallet
+2. Explorar galería en `/gallery`
+3. Ver detalles de artworks
+4. Comprar directamente con ETH
 
-### 2. Update Configuration
+## Contratos
 
-Update your `minikit.config.ts` file to include the `accountAssociation` object:
+### MolotovNFT.sol
 
-```ts
-export const minikitConfig = {
-    accountAssociation: {
-        "header": "your-header-here",
-        "payload": "your-payload-here",
-        "signature": "your-signature-here"
-    },
-    frame: {
-        // ... rest of your frame configuration
-    },
-}
-```
+Contrato principal ERC721 con las siguientes características:
 
-### 3. Deploy Updates
+- **Minteo**: Solo artistas registrados pueden mintear
+- **Marketplace**: Listado y compra directa integrados
+- **Regalías**: Soporte ERC2981 (hasta 10%)
+- **Metadata**: URI apuntando a IPFS
 
-```bash
-vercel --prod
-```
+Funciones principales:
+- `registerArtist()` - Registrar como artista
+- `mintArtwork()` - Crear nuevo NFT
+- `purchaseArtwork()` - Comprar artwork
+- `updateArtworkListing()` - Actualizar precio/estado
 
-## Testing and Publishing
+## API de IPFS
 
-### 1. Preview Your App
+El servicio de IPFS (`app/services/ipfs.ts`) proporciona:
 
-Go to [base.dev/preview](https://base.dev/preview) to validate your app:
+- `uploadFileToIPFS(file)` - Subir imagen/GIF
+- `uploadMetadataToIPFS(metadata)` - Subir metadata JSON
+- `getIPFSUrl(hash)` - Obtener URL del gateway
 
-1. Add your app URL to view the embeds and click the launch button to verify the app launches as expected
-2. Use the "Account association" tab to verify the association credentials were created correctly
-3. Use the "Metadata" tab to see the metadata added from the manifest and identify any missing fields
+## Licencia
 
-### 2. Publish to Base App
-
-To publish your app, create a post in the Base app with your app's URL.
-
-## Learn More
-
-For detailed step-by-step instructions, see the [Create a Mini App tutorial](https://docs.base.org/docs/mini-apps/quickstart/create-new-miniapp/) in the Base documentation.
-
-
----
-
-## Disclaimer  
-
-This project is a **demo application** created by the **Base / Coinbase Developer Relations team** for **educational and demonstration purposes only**.  
-
-**There is no token, cryptocurrency, or investment product associated with Cubey, Base, or Coinbase.**  
-
-Any social media pages, tokens, or applications claiming to be affiliated with, endorsed by, or officially connected to Cubey, Base, or Coinbase are **unauthorized and fraudulent**.  
-
-We do **not** endorse or support any third-party tokens, apps, or projects using the Cubey name or branding.  
-
-> [!WARNING]
-> Do **not** purchase, trade, or interact with any tokens or applications claiming affiliation with Coinbase, Base, or Cubey.  
-> Coinbase and Base will never issue a token or ask you to connect your wallet for this demo.  
-
-For official Base developer resources, please visit:  
-- [https://base.org](https://base.org)  
-- [https://docs.base.org](https://docs.base.org)  
-
----
+MIT

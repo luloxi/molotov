@@ -1,0 +1,94 @@
+.container {
+  width: 100%;
+}
+
+.title {
+  margin: 0 0 24px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary, #fff);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+.empty {
+  text-align: center;
+  padding: 64px 24px;
+  color: var(--text-secondary, #888);
+}
+
+.empty p {
+  margin: 0 0 16px;
+  font-size: 1.125rem;
+}
+
+.clearFilter {
+  background: var(--accent, #6366f1);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.clearFilter:hover {
+  background: var(--accent-hover, #4f46e5);
+}
+
+/* Skeleton styles */
+.skeletonCard {
+  background: var(--card-bg, #1a1a2e);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.skeletonImage {
+  width: 100%;
+  aspect-ratio: 1;
+  background: linear-gradient(
+    90deg,
+    var(--skeleton-bg, #2a2a4e) 0%,
+    var(--skeleton-shine, #3a3a5e) 50%,
+    var(--skeleton-bg, #2a2a4e) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.skeletonInfo {
+  padding: 16px;
+}
+
+.skeletonTitle {
+  height: 20px;
+  width: 70%;
+  background: var(--skeleton-bg, #2a2a4e);
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+.skeletonArtist {
+  height: 14px;
+  width: 40%;
+  background: var(--skeleton-bg, #2a2a4e);
+  border-radius: 4px;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@media (max-width: 640px) {
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 16px;
+  }
+}

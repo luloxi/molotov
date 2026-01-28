@@ -1,22 +1,23 @@
 import type { Metadata } from "next";
 import { Inter, Source_Code_Pro } from "next/font/google";
 import { SafeArea } from "./components/SafeArea";
+import { Navigation } from "./components/Navigation";
 import { farcasterConfig } from "../farcaster.config";
 import { Providers } from "./providers";
 import "./globals.css";
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: farcasterConfig.miniapp.name,
-    description: farcasterConfig.miniapp.description,
+    title: "Molotov Gallery - NFT Art on Base",
+    description: "Discover, collect, and sell extraordinary NFT art on Base. A decentralized gallery for artists and collectors.",
     other: {
       "fc:frame": JSON.stringify({
         version: farcasterConfig.miniapp.version,
         imageUrl: farcasterConfig.miniapp.heroImageUrl,
         button: {
-          title: `Join the ${farcasterConfig.miniapp.name} Waitlist`,
+          title: "Explore Gallery",
           action: {
-            name: `Launch ${farcasterConfig.miniapp.name}`,
+            name: "Launch Molotov Gallery",
             type: "launch_frame",
           },
         },
@@ -44,6 +45,7 @@ export default function RootLayout({
     <Providers>
       <html lang="en">
         <body className={`${inter.variable} ${sourceCodePro.variable}`}>
+          <Navigation />
           <SafeArea>{children}</SafeArea>
         </body>
       </html>

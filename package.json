@@ -1,12 +1,16 @@
 {
-  "name": "new-mini-app-quickstart",
+  "name": "molotov-gallery",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "forge:build": "cd contracts && forge build",
+    "forge:test": "cd contracts && forge test",
+    "forge:deploy:sepolia": "cd contracts && source .env 2>/dev/null; forge script script/DeployMolotov.s.sol --rpc-url ${BASE_SEPOLIA_RPC_URL:-https://sepolia.base.org} --broadcast --verify",
+    "forge:deploy:mainnet": "cd contracts && source .env 2>/dev/null; forge script script/DeployMolotov.s.sol --rpc-url ${BASE_RPC_URL:-https://mainnet.base.org} --broadcast --verify"
   },
   "dependencies": {
     "@farcaster/miniapp-sdk": "^0.2.0",

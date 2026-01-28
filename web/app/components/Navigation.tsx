@@ -41,10 +41,8 @@ export function Navigation() {
       return;
     }
 
-    const prefersDark = window.matchMedia &&
-      window.matchMedia("(prefers-color-scheme: dark)").matches;
-
-    applyTheme(prefersDark ? "dark" : "light");
+    // Default to light theme when no preference is stored
+    applyTheme("light");
   }, []);
 
   useEffect(() => {
@@ -168,23 +166,6 @@ export function Navigation() {
         </div>
         
         <div className={styles.actions}>
-          <button
-            type="button"
-            onClick={toggleTheme}
-            className={`${styles.themeToggle} ${
-              theme === "light" ? styles.themeToggleLight : styles.themeToggleDark
-            }`}
-            aria-label={`Use ${theme === "light" ? "dark" : "light"} theme`}
-          >
-            <span className={`${styles.themeIcon} ${styles.themeIconSun}`} aria-hidden="true">
-              <Sun />
-            </span>
-            <span className={`${styles.themeIcon} ${styles.themeIconMoon}`} aria-hidden="true">
-              <Moon />
-            </span>
-            <span className={styles.themeToggleThumb} aria-hidden="true" />
-          </button>
-
           {mounted && isConnected && address ? (
             <>
               {isWrongNetwork ? (

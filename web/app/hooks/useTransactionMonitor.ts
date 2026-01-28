@@ -1,10 +1,11 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { usePublicClient, useChainId } from 'wagmi';
+import { usePublicClient } from 'wagmi';
 import { parseAbiItem } from 'viem';
 import { TransactionEvent } from '../types';
 import { getContractAddress, MOLOTOV_NFT_ABI } from '../services/contract';
+import { baseSepolia } from 'wagmi/chains';
 
 const MAX_EVENTS = 50;
 
@@ -14,13 +15,16 @@ type DecodedLog = any;
 type ArtistNameMap = Record<string, string>;
 
 export function useTransactionMonitor() {
+  // Force all activity to read from Base Sepolia in production
+  const TARGET_CHAIN_ID = baseSepolia.id;
+
   const [events, setEvents] = useState<TransactionEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [artistNames, setArtistNames] = useState<ArtistNameMap>({});
 
-  const publicClient = usePublicClient();
-  const chainId = useChainId();
-  const contractAddress = getContractAddress(chainId);
+  // Always use a public client scoped to Base Sepolia
+  const publicClient = usePublicClient({ chainId: TARGET_CHAIN_ID });
+  const contractAddress = getContractAddress(TARGET_CHAIN_ID);
 
   // Process decoded log to TransactionEvent
   const processLog = useCallback((log: DecodedLog, type: TransactionEvent['type']): TransactionEvent | null => {

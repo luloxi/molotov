@@ -12,15 +12,6 @@ interface GalleryFiltersBarProps {
 export function GalleryFiltersBar({ filters, onChange }: GalleryFiltersBarProps) {
   const { categories, isLoading: categoriesLoading } = useCategories();
 
-  const toggleCategory = (categoryId: string) => {
-    const current = filters.category || [];
-    const isSelected = current.includes(categoryId);
-    const newCategories = isSelected
-      ? current.filter((c) => c !== categoryId)
-      : [...current, categoryId];
-    onChange({ ...filters, category: newCategories.length ? newCategories : undefined });
-  };
-
   return (
     <div className={styles.container}>
       <div className={styles.filterGroup}>
@@ -36,32 +27,21 @@ export function GalleryFiltersBar({ filters, onChange }: GalleryFiltersBarProps)
 
       <div className={styles.filterGroup}>
         <label className={styles.label}>Category</label>
-        <div className={styles.categoryTags}>
-          {categoriesLoading ? (
-            <span className={styles.loadingText}>Loading...</span>
-          ) : (
-            categories.map((cat: Category) => {
-              const isSelected = filters.category?.includes(cat.id);
-              return (
-                <button
-                  key={cat.id}
-                  className={`${styles.categoryTag} ${isSelected ? styles.selected : ''}`}
-                  onClick={() => toggleCategory(cat.id)}
-                  style={isSelected && cat.color ? { 
-                    backgroundColor: cat.color, 
-                    borderColor: cat.color,
-                    color: '#fff'
-                  } : cat.color ? {
-                    borderColor: cat.color,
-                    color: cat.color
-                  } : undefined}
-                >
-                  {cat.name}
-                </button>
-              );
-            })
-          )}
-        </div>
+        <select
+          value={filters.category?.[0] || ''}
+          onChange={(e) => {
+            const value = e.target.value;
+            onChange({ ...filters, category: value ? [value] : undefined });
+          }}
+          className={styles.select}
+        >
+          <option value="">All Categories</option>
+          {!categoriesLoading && categories.map((cat: Category) => (
+            <option key={cat.id} value={cat.id}>
+              {cat.name}{cat._count?.artworks !== undefined ? ` (${cat._count.artworks})` : ''}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div className={styles.filterGroup}>

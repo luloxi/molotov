@@ -1,9 +1,10 @@
 "use client";
 
-import { } from "react";
+import { useMemo } from "react";
 import { useAccount } from "wagmi";
 import { useMiniApp } from "./providers/MiniAppProvider";
 import { useArtworksForSale, useAllArtists, useTotalSupply } from "./hooks/useContract";
+import { useListingTimes } from "./hooks/useListingTimes";
 import { GalleryGrid } from "./components/gallery";
 import { TransactionFeed } from "./components/transactions";
 import { Artwork } from "./types";
@@ -17,8 +18,20 @@ export default function Home() {
   const { data: artworksData, isLoading: artworksLoading } = useArtworksForSale();
   const { data: artistsData } = useAllArtists();
   const { data: totalSupply } = useTotalSupply();
+  const { getListingTime, listingTimes, isLoading: listingTimesLoading } = useListingTimes();
 
   const artworks = (artworksData as Artwork[]) || [];
+  
+  // Sort artworks by listing time descending (most recently listed first)
+  // Listing time = when artwork was created OR when it was put for sale (whichever is more recent)
+  // Falls back to createdAt if no listing event found
+  const sortedArtworks = useMemo(() => {
+    return [...artworks].sort((a, b) => {
+      const aListingTime = getListingTime(a.tokenId) ?? Number(a.createdAt) * 1000;
+      const bListingTime = getListingTime(b.tokenId) ?? Number(b.createdAt) * 1000;
+      return bListingTime - aListingTime;
+    });
+  }, [artworks, getListingTime, listingTimes]);
   const artistCount = (artistsData as string[])?.length || 0;
   const nftCount = totalSupply ? Number(totalSupply) : 0;
 
@@ -53,7 +66,7 @@ export default function Home() {
           </div>
 
           <div className={styles.heroActions}>
-            <Link href="/gallery" className={styles.primaryButton}>
+            <Link href="/explore" className={styles.primaryButton}>
               Explore
             </Link>
             {isConnected ? (
@@ -79,12 +92,12 @@ export default function Home() {
         <section className={styles.section}>
           <div className={styles.sectionHeader}>
             <h2 className={styles.sectionTitle}>Featured Artworks</h2>
-            <Link href="/gallery" className={styles.seeAll}>
+            <Link href="/explore" className={styles.seeAll}>
               See all
             </Link>
           </div>
           <GalleryGrid 
-            artworks={artworks.slice(0, 8)} 
+            artworks={sortedArtworks.slice(0, 8)} 
             isLoading={artworksLoading}
             showFilters={false}
           />

@@ -45,41 +45,6 @@
   gap: 6px;
 }
 
-.categoryTags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  max-width: 400px;
-}
-
-.categoryTag {
-  padding: 5px 10px;
-  border: 1px solid var(--border, #e0e0e0);
-  background: var(--card-bg, #fff);
-  color: var(--text-secondary, #555);
-  border-radius: 16px;
-  font-size: 0.6875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-}
-
-.categoryTag:hover {
-  border-color: var(--accent, #2563eb);
-  color: var(--accent, #2563eb);
-}
-
-.categoryTag.selected {
-  background: var(--text-primary, #111);
-  border-color: var(--text-primary, #111);
-  color: var(--bg-primary, #fff);
-}
-
-.loadingText {
-  font-size: 0.75rem;
-  color: var(--text-muted, #999);
-}
 
 .mediaTypeBtn {
   padding: 6px 12px;

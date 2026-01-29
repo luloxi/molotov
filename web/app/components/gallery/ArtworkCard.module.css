@@ -101,6 +101,15 @@
   color: var(--text-primary, #fff);
 }
 
+.categoryBadge {
+  display: inline-block;
+  margin-bottom: 6px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text-muted, #999);
+}
+
 .artist {
   margin: 0 0 10px;
   font-size: 0.8125rem;

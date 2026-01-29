@@ -107,17 +107,31 @@
   opacity: 1;
 }
 
+.badges {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.categoryBadge {
+  padding: 6px 12px;
+  background: var(--accent, #6366f1);
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: white;
+  white-space: nowrap;
+}
+
 .gifBadge {
-  position: absolute;
-  top: 16px;
-  right: 16px;
   padding: 6px 12px;
   background: rgba(138, 43, 226, 0.9);
-  border-radius: 20px;
+  border-radius: 8px;
   font-size: 0.75rem;
   font-weight: 600;
   color: white;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .detailsSection {
@@ -244,6 +258,15 @@
   font-size: 1.25rem;
   font-weight: 600;
   color: white;
+  flex-shrink: 0;
+}
+
+.artistAvatarImg {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
 }
 
 .artistName {
@@ -311,6 +334,100 @@
   color: var(--text-primary, #fff);
   font-size: 0.875rem;
   font-weight: 500;
+}
+
+.categoryEditWrapper {
+  display: flex;
+  align-items: center;
+}
+
+.categoryEditButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--text-primary, #fff);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.categoryEditButton:hover {
+  color: var(--accent, #6366f1);
+}
+
+.categoryEditButton svg {
+  opacity: 0.5;
+}
+
+.categoryEditButton:hover svg {
+  opacity: 1;
+}
+
+.categorySelect {
+  padding: 6px 10px;
+  background: var(--input-bg, #0d0d1a);
+  border: 1px solid var(--border, #333);
+  border-radius: 8px;
+  color: var(--text-primary, #fff);
+  font-size: 0.8125rem;
+  cursor: pointer;
+  outline: none;
+}
+
+.categorySelect:focus {
+  border-color: var(--accent, #6366f1);
+}
+
+/* Attributes */
+.attributesSection {
+  padding: 20px;
+  background: var(--card-bg, #1a1a2e);
+  border-radius: 12px;
+}
+
+.attributesSection h3 {
+  margin: 0 0 16px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-secondary, #888);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.attributesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+.attributeCard {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px;
+  background: var(--input-bg, #0d0d1a);
+  border: 1px solid var(--border, #333);
+  border-radius: 10px;
+  text-align: center;
+}
+
+.attributeType {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--accent, #6366f1);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.attributeValue {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text-primary, #fff);
+  word-break: break-word;
 }
 
 .priceSection {

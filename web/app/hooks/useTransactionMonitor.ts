@@ -94,6 +94,16 @@ export function useTransactionMonitor() {
         };
       }
 
+      if (type === 'list' && log.args) {
+        return {
+          ...baseEvent,
+          type: 'list',
+          tokenId: log.args.tokenId,
+          from: '0x0000000000000000000000000000000000000000' as `0x${string}`, // Will be enriched later
+          price: log.args.newPrice,
+        };
+      }
+
       return null;
     } catch (e) {
       console.error('Error processing log:', e);
@@ -137,7 +147,7 @@ export function useTransactionMonitor() {
       const currentTime = Date.now();
 
       // Fetch different event types
-      const [mintLogs, purchaseLogs, registerLogs] = await Promise.all([
+      const [mintLogs, purchaseLogs, registerLogs, listLogs] = await Promise.all([
         publicClient.getLogs({
           address: contractAddress,
           event: parseAbiItem('event ArtworkMinted(uint256 indexed tokenId, address indexed artist, string title, string ipfsHash, uint256 price)'),
@@ -153,6 +163,12 @@ export function useTransactionMonitor() {
         publicClient.getLogs({
           address: contractAddress,
           event: parseAbiItem('event ArtistRegistered(address indexed artist, string name)'),
+          fromBlock,
+          toBlock: currentBlock,
+        }),
+        publicClient.getLogs({
+          address: contractAddress,
+          event: parseAbiItem('event ArtworkPriceUpdated(uint256 indexed tokenId, uint256 oldPrice, uint256 newPrice, bool isForSale)'),
           fromBlock,
           toBlock: currentBlock,
         }),
@@ -181,10 +197,43 @@ export function useTransactionMonitor() {
         }
       });
 
-      console.log(`[TransactionMonitor] Found ${mintLogs.length} mints, ${purchaseLogs.length} purchases, ${registerLogs.length} registrations`);
+      // Build a map of tokenId -> { artist, title } from mint events
+      const artworkInfoMap: Record<string, { artist: `0x${string}`; title?: string }> = {};
+      mintLogs.forEach((log) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const args = (log as any).args;
+        if (args?.tokenId !== undefined) {
+          artworkInfoMap[args.tokenId.toString()] = {
+            artist: args.artist,
+            title: args.title,
+          };
+        }
+      });
+
+      // Process list events - only include when isForSale is true (listing for sale)
+      listLogs.forEach((log) => {
+        const event = processLog(log, 'list', currentBlock, currentTime);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const args = (log as any).args;
+        if (event && args?.isForSale === true) {
+          // Enrich with artwork info from mint events
+          const artworkInfo = event.tokenId !== undefined ? artworkInfoMap[event.tokenId.toString()] : undefined;
+          if (artworkInfo) {
+            event.from = artworkInfo.artist;
+            event.artworkTitle = artworkInfo.title;
+          }
+          allEvents.push(event);
+        }
+      });
+
+      console.log(`[TransactionMonitor] Found ${mintLogs.length} mints, ${purchaseLogs.length} purchases, ${registerLogs.length} registrations, ${listLogs.length} listings`);
       
-      // Sort by block number descending
-      allEvents.sort((a, b) => Number(b.blockNumber - a.blockNumber));
+      // Sort by block number descending (use proper bigint comparison)
+      allEvents.sort((a, b) => {
+        if (b.blockNumber > a.blockNumber) return 1;
+        if (b.blockNumber < a.blockNumber) return -1;
+        return 0;
+      });
 
       const trimmed = allEvents.slice(0, MAX_EVENTS);
       const enriched = applyArtistNames(trimmed, nameMap);
@@ -288,10 +337,48 @@ export function useTransactionMonitor() {
       },
     });
 
+    const unwatchList = publicClient.watchContractEvent({
+      address: contractAddress,
+      abi: MOLOTOV_NFT_ABI,
+      eventName: 'ArtworkPriceUpdated',
+      onLogs: (logs) => {
+        setEvents((prev) => {
+          const nextEvents = [...prev];
+          for (const log of logs) {
+            const decodedLog = log as DecodedLog;
+            // Only show listing events (when isForSale becomes true)
+            if (decodedLog.args?.isForSale !== true) continue;
+            
+            const event = processLog(decodedLog, 'list');
+            if (event) {
+              // Try to find artwork info from existing mint events
+              const mintEvent = prev.find(
+                (e) => e.type === 'mint' && e.tokenId !== undefined && 
+                       event.tokenId !== undefined && e.tokenId === event.tokenId
+              );
+              if (mintEvent) {
+                event.from = mintEvent.from;
+                event.artworkTitle = mintEvent.artworkTitle;
+              }
+              
+              const fromName = artistNames[event.from.toLowerCase()];
+              const enrichedEvent: TransactionEvent = {
+                ...event,
+                artistName: fromName || event.artistName,
+              };
+              nextEvents.unshift(enrichedEvent);
+            }
+          }
+          return nextEvents.slice(0, MAX_EVENTS);
+        });
+      },
+    });
+
     return () => {
       unwatchMint();
       unwatchPurchase();
       unwatchRegister();
+      unwatchList();
     };
   }, [publicClient, contractAddress, processLog, artistNames]);
 

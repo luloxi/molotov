@@ -6,9 +6,11 @@ import { useAccount } from 'wagmi';
 import Link from 'next/link';
 import { useArtwork, useTokenOwner, useArtistProfile, usePurchaseArtwork, useUpdateListing } from '../../hooks/useContract';
 import { useArtworkStats } from '../../hooks/useArtworkStats';
+import { useCategories, useArtworkCategories } from '../../hooks/useCategories';
 import { useEthPrice } from '../../hooks/useEthPrice';
 import { getIPFSUrl, getNextIPFSUrl } from '../../services/ipfs';
 import { formatPrice, truncateAddress, formatTimestamp } from '../../services/contract';
+import type { ArtworkAttribute } from '../../types';
 import styles from './page.module.css';
 
 export default function ArtworkPage() {
@@ -16,21 +18,28 @@ export default function ArtworkPage() {
   const tokenId = BigInt(params.id as string);
   const { address, isConnected } = useAccount();
   
-  const { data: artwork, isLoading: artworkLoading } = useArtwork(tokenId);
+  const { data: artwork, isLoading: artworkLoading, refetch: refetchArtwork } = useArtwork(tokenId);
   const { data: owner } = useTokenOwner(tokenId);
   const { data: artistProfile } = useArtistProfile(artwork?.artist);
   const { stats, recordView, toggleLike, isLiking } = useArtworkStats(tokenId);
-  
+  const { categories: artworkCategories, setCategories: setArtworkCategory } = useArtworkCategories(tokenId.toString());
+  const artworkCategory = artworkCategories.length > 0 ? artworkCategories[0] : null;
+  const { categories: allCategories } = useCategories();
+
   const { purchase, isPending: purchasePending, isConfirming: purchaseConfirming } = usePurchaseArtwork();
-  const { updateListing, isPending: listingPending, isConfirming: listingConfirming } = useUpdateListing();
+  const { updateListing, isPending: listingPending, isConfirming: listingConfirming, isSuccess: listingSuccess } = useUpdateListing();
   const { convertEthToUsd } = useEthPrice();
   
   const [showListingModal, setShowListingModal] = useState(false);
   const [newPrice, setNewPrice] = useState('');
   const [newForSale, setNewForSale] = useState(true);
-  
+  const [showCategorySelect, setShowCategorySelect] = useState(false);
+
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageUrl, setImageUrl] = useState('');
+  const [avatarUrl, setAvatarUrl] = useState('');
+  const [avatarError, setAvatarError] = useState(false);
+  const [attributes, setAttributes] = useState<ArtworkAttribute[]>([]);
 
   // Update image URL when artwork loads
   useEffect(() => {
@@ -38,6 +47,48 @@ export default function ArtworkPage() {
       setImageUrl(getIPFSUrl(artwork.ipfsHash));
     }
   }, [artwork?.ipfsHash]);
+
+  // Update avatar URL when artist profile loads
+  useEffect(() => {
+    if (artistProfile?.profileImageHash) {
+      setAvatarUrl(getIPFSUrl(artistProfile.profileImageHash));
+      setAvatarError(false);
+    }
+  }, [artistProfile?.profileImageHash]);
+
+  // Fetch metadata from IPFS to get attributes
+  useEffect(() => {
+    const fetchMetadata = async () => {
+      if (!artwork?.metadataHash) return;
+      
+      try {
+        const metadataUrl = getIPFSUrl(artwork.metadataHash);
+        const response = await fetch(metadataUrl);
+        if (response.ok) {
+          const metadata = await response.json();
+          if (metadata.attributes && Array.isArray(metadata.attributes)) {
+            // Filter out system attributes that are already displayed elsewhere
+            const systemTraits = ['Artist', 'Edition', 'Media Type'];
+            const customAttributes = metadata.attributes.filter(
+              (attr: ArtworkAttribute) => !systemTraits.includes(attr.trait_type)
+            );
+            setAttributes(customAttributes);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch metadata:', error);
+      }
+    };
+    
+    fetchMetadata();
+  }, [artwork?.metadataHash]);
+
+  // Refetch artwork data after listing update is confirmed
+  useEffect(() => {
+    if (listingSuccess) {
+      refetchArtwork();
+    }
+  }, [listingSuccess, refetchArtwork]);
 
   // Record view when page loads
   useEffect(() => {
@@ -84,6 +135,15 @@ export default function ArtworkPage() {
   const handleUpdateListing = () => {
     updateListing(tokenId, newPrice, newForSale);
     setShowListingModal(false);
+  };
+
+  const handleCategoryChange = async (categoryId: string) => {
+    try {
+      await setArtworkCategory(categoryId ? [categoryId] : []);
+      setShowCategorySelect(false);
+    } catch (err) {
+      console.error('Failed to update category:', err);
+    }
   };
 
   const handleShare = async () => {
@@ -140,18 +200,28 @@ export default function ArtworkPage() {
                 if (next) setImageUrl(next);
               }}
             />
-            {isGif && <span className={styles.gifBadge}>GIF</span>}
           </div>
         </div>
         
         <div className={styles.detailsSection}>
           <div className={styles.titleRow}>
             <h1 className={styles.title}>{artwork.title}</h1>
-            {artwork.totalEditions > BigInt(1) && (
-              <span className={styles.edition}>
-                Edition {artwork.editionNumber.toString()}/{artwork.totalEditions.toString()}
-              </span>
-            )}
+            <div className={styles.badges}>
+              {artworkCategory && (
+                <span
+                  className={styles.categoryBadge}
+                  style={artworkCategory.color ? { backgroundColor: artworkCategory.color } : undefined}
+                >
+                  {artworkCategory.name}
+                </span>
+              )}
+              {isGif && <span className={styles.gifBadge}>GIF</span>}
+              {artwork.totalEditions > BigInt(1) && (
+                <span className={styles.edition}>
+                  Edition {artwork.editionNumber.toString()}/{artwork.totalEditions.toString()}
+                </span>
+              )}
+            </div>
           </div>
           
           {/* Actions and stats */}
@@ -189,9 +259,25 @@ export default function ArtworkPage() {
           </div>
           
           <Link href={`/artist/${artwork.artist}`} className={styles.artistInfo}>
-            <div className={styles.artistAvatar}>
-              {artistProfile?.name?.charAt(0) || '?'}
-            </div>
+            {avatarUrl && !avatarError ? (
+              <img
+                src={avatarUrl}
+                alt={artistProfile?.name || ''}
+                className={styles.artistAvatarImg}
+                onError={() => {
+                  const next = getNextIPFSUrl(avatarUrl);
+                  if (next) {
+                    setAvatarUrl(next);
+                  } else {
+                    setAvatarError(true);
+                  }
+                }}
+              />
+            ) : (
+              <div className={styles.artistAvatar}>
+                {artistProfile?.name?.charAt(0) || '?'}
+              </div>
+            )}
             <div>
               <p className={styles.artistName}>
                 {artistProfile?.name || truncateAddress(artwork.artist)}
@@ -220,6 +306,41 @@ export default function ArtworkPage() {
               </span>
             </div>
             <div className={styles.detailRow}>
+              <span className={styles.detailLabel}>Category</span>
+              {isOwner ? (
+                <div className={styles.categoryEditWrapper}>
+                  {showCategorySelect ? (
+                    <select
+                      className={styles.categorySelect}
+                      value={artworkCategory?.id || ''}
+                      onChange={(e) => handleCategoryChange(e.target.value)}
+                      onBlur={() => setShowCategorySelect(false)}
+                      autoFocus
+                    >
+                      <option value="">None</option>
+                      {allCategories.map((cat) => (
+                        <option key={cat.id} value={cat.id}>{cat.name}</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <button
+                      className={styles.categoryEditButton}
+                      onClick={() => setShowCategorySelect(true)}
+                    >
+                      {artworkCategory ? artworkCategory.name : 'Set category'}
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                      </svg>
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <span className={styles.detailValue}>
+                  {artworkCategory?.name || 'Uncategorized'}
+                </span>
+              )}
+            </div>
+            <div className={styles.detailRow}>
               <span className={styles.detailLabel}>Created</span>
               <span className={styles.detailValue}>{formatTimestamp(artwork.createdAt)}</span>
             </div>
@@ -228,6 +349,20 @@ export default function ArtworkPage() {
               <span className={styles.detailValue}>{artwork.mediaType}</span>
             </div>
           </div>
+          
+          {attributes.length > 0 && (
+            <div className={styles.attributesSection}>
+              <h3>Attributes</h3>
+              <div className={styles.attributesGrid}>
+                {attributes.map((attr, index) => (
+                  <div key={index} className={styles.attributeCard}>
+                    <span className={styles.attributeType}>{attr.trait_type}</span>
+                    <span className={styles.attributeValue}>{attr.value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
           
           <div className={styles.priceSection}>
             {artwork.isForSale ? (

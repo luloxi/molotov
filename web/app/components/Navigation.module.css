@@ -65,6 +65,29 @@
   font-weight: 600;
 }
 
+.createButton {
+  background: linear-gradient(135deg, var(--accent, #2563eb) 0%, #7c3aed 100%);
+  color: #fff !important;
+  font-weight: 600;
+  border-radius: 20px;
+  padding: 8px 18px;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+  transition: all 0.25s ease;
+}
+
+.createButton:hover {
+  background: linear-gradient(135deg, #1d4ed8 0%, #6d28d9 100%);
+  color: #fff !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.4);
+}
+
+.createButton.active {
+  background: linear-gradient(135deg, #1d4ed8 0%, #6d28d9 100%);
+  color: #fff !important;
+  box-shadow: 0 2px 12px rgba(37, 99, 235, 0.4);
+}
+
 .actions {
   display: flex;
   align-items: center;

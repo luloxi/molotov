@@ -4,7 +4,7 @@ import { useAllTokenIds, useArtworks } from '../hooks/useContract';
 import { GalleryGrid } from '../components/gallery';
 import styles from './page.module.css';
 
-export default function GalleryPage() {
+export default function ExplorePage() {
   const { data: tokenIds, isLoading: idsLoading } = useAllTokenIds();
   const { data: artworks, isLoading: artworksLoading } = useArtworks(tokenIds as bigint[] | undefined);
   

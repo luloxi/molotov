@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAccount } from 'wagmi';
-import { Artwork } from '../../types';
+import { Artwork, Category } from '../../types';
 import { getIPFSUrl, getNextIPFSUrl } from '../../services/ipfs';
 import { formatPrice, truncateAddress } from '../../services/contract';
 import { useArtistProfile } from '../../hooks/useContract';
@@ -33,9 +33,29 @@ export function ArtworkCard({ artwork, showArtist = true }: ArtworkCardProps) {
   const { data: artistProfile } = useArtistProfile(artwork.artist);
   const artistName = artistProfile?.name || truncateAddress(artwork.artist);
   
+  const [category, setCategory] = useState<Category | null>(null);
   const [imageUrl, setImageUrl] = useState(() => getIPFSUrl(artwork.ipfsHash));
   const tokenIdStr = artwork.tokenId.toString();
-  
+
+  // Fetch category on mount
+  useEffect(() => {
+    const fetchCategory = async () => {
+      try {
+        const res = await fetch(`/api/artwork/${tokenIdStr}/categories`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.length > 0) {
+            setCategory(data[0]);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching category:', error);
+      }
+    };
+
+    fetchCategory();
+  }, [tokenIdStr]);
+
   // Fetch stats on mount
   useEffect(() => {
     const fetchStats = async () => {
@@ -160,7 +180,16 @@ export function ArtworkCard({ artwork, showArtist = true }: ArtworkCardProps) {
       
       <div className={styles.info}>
         <h3 className={styles.title}>{artwork.title}</h3>
-        
+
+        {category && (
+          <span
+            className={styles.categoryBadge}
+            style={category.color ? { color: category.color } : undefined}
+          >
+            {category.name}
+          </span>
+        )}
+
         {showArtist && (
           <p className={styles.artist}>
             by {artistName}

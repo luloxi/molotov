@@ -167,17 +167,31 @@ export function Navigation() {
           >
             HOME
           </Link>
-          <Link 
-            href="/gallery" 
-            className={`${styles.link} ${pathname === '/gallery' ? styles.active : ''}`}
+          <Link
+            href="/explore"
+            className={`${styles.link} ${pathname === '/explore' ? styles.active : ''}`}
           >
             EXPLORE
           </Link>
-          <Link 
-            href="/mint" 
-            className={`${styles.link} ${pathname === '/mint' ? styles.active : ''}`}
+          <Link
+            href="/artists"
+            className={`${styles.link} ${pathname === '/artists' ? styles.active : ''}`}
           >
-            CREATE
+            ARTISTS
+          </Link>
+          {mounted && isConnected && (
+            <Link
+              href="/mynfts"
+              className={`${styles.link} ${pathname === '/mynfts' ? styles.active : ''}`}
+            >
+              MY NFTS
+            </Link>
+          )}
+          <Link
+            href="/mint"
+            className={`${styles.link} ${styles.createButton} ${pathname === '/mint' ? styles.active : ''}`}
+          >
+            Create NFT
           </Link>
         </div>
         

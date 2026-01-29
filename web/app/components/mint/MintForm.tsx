@@ -32,51 +32,47 @@ export function MintForm({ onSuccess: _onSuccess }: MintFormProps) {
     attributes: [],
   });
   
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [mediaType, setMediaType] = useState<string>('');
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
   const [newAttribute, setNewAttribute] = useState({ trait_type: '', value: '' });
-  const [categoriesSaved, setCategoriesSaved] = useState(false);
+  const [categorySaved, setCategorySaved] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   
   const { mint, isPending, isConfirming, isSuccess, hash, mintedTokenId, error: txError } = useMintArtwork();
 
-  const toggleCategory = (categoryId: string) => {
-    setSelectedCategories((prev) =>
-      prev.includes(categoryId)
-        ? prev.filter((id) => id !== categoryId)
-        : [...prev, categoryId]
-    );
+  const selectCategory = (categoryId: string) => {
+    setSelectedCategory((prev) => (prev === categoryId ? null : categoryId));
   };
 
-  // After successful mint, add categories to the artwork
+  // After successful mint, save category to the artwork
   useEffect(() => {
-    const addCategoriesToMintedArtwork = async () => {
-      if (isSuccess && mintedTokenId && selectedCategories.length > 0 && !categoriesSaved) {
+    const addCategoryToMintedArtwork = async () => {
+      if (isSuccess && mintedTokenId && selectedCategory && !categorySaved) {
         try {
           const response = await fetch(`/api/artwork/${mintedTokenId}/categories`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ categoryIds: selectedCategories }),
+            body: JSON.stringify({ categoryIds: [selectedCategory] }),
           });
-          
+
           if (response.ok) {
-            setCategoriesSaved(true);
-            console.log('Categories saved for artwork:', mintedTokenId);
+            setCategorySaved(true);
+            console.log('Category saved for artwork:', mintedTokenId);
           } else {
-            console.error('Failed to save categories');
+            console.error('Failed to save category');
           }
         } catch (err) {
-          console.error('Error saving categories:', err);
+          console.error('Error saving category:', err);
         }
       }
     };
-    
-    addCategoriesToMintedArtwork();
-  }, [isSuccess, mintedTokenId, selectedCategories, categoriesSaved]);
+
+    addCategoryToMintedArtwork();
+  }, [isSuccess, mintedTokenId, selectedCategory, categorySaved]);
 
   const processFile = useCallback((file: File) => {
     const validation = validateArtworkFile(file);
@@ -418,24 +414,24 @@ export function MintForm({ onSuccess: _onSuccess }: MintFormProps) {
       
       <div className={styles.categoriesSection}>
         <h3 className={styles.sectionTitle}>
-          Categories
-          <InfoTooltip text="Select one or more categories that best describe your artwork. This helps collectors discover your work in the gallery." />
+          Category
+          <InfoTooltip text="Select the category that best describes your artwork. This helps collectors discover your work in the gallery." />
         </h3>
-        
+
         <div className={styles.categoryGrid}>
           {categoriesLoading ? (
             <span className={styles.loadingText}>Loading categories...</span>
           ) : (
             availableCategories.map((cat: Category) => {
-              const isSelected = selectedCategories.includes(cat.id);
+              const isSelected = selectedCategory === cat.id;
               return (
                 <button
                   key={cat.id}
                   type="button"
                   className={`${styles.categoryChip} ${isSelected ? styles.categorySelected : ''}`}
-                  onClick={() => toggleCategory(cat.id)}
-                  style={isSelected && cat.color ? { 
-                    backgroundColor: cat.color, 
+                  onClick={() => selectCategory(cat.id)}
+                  style={isSelected && cat.color ? {
+                    backgroundColor: cat.color,
                     borderColor: cat.color,
                     color: '#fff'
                   } : cat.color ? {

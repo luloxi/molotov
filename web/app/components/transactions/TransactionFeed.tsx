@@ -30,6 +30,12 @@ export function TransactionFeed() {
             <path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
           </svg>
         );
+      case 'list':
+        return (
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/>
+          </svg>
+        );
       default:
         return (
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -85,6 +91,18 @@ export function TransactionFeed() {
             {' joined as an artist'}
           </>
         );
+      case 'list':
+        return (
+          <>
+            {renderAddressLink(event.from, event.artistName)}
+            {' listed '}
+            {event.tokenId !== undefined && renderArtworkLink(event.tokenId, event.artworkTitle)}
+            {' for sale'}
+            {event.price && (
+              <span className={styles.price}> at {formatPrice(event.price)} ETH</span>
+            )}
+          </>
+        );
       default:
         return 'Unknown event';
     }
@@ -98,6 +116,8 @@ export function TransactionFeed() {
         return styles.purchase;
       case 'register':
         return styles.register;
+      case 'list':
+        return styles.list;
       default:
         return '';
     }

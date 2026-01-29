@@ -26,9 +26,7 @@ export function useEthPrice() {
 
       try {
         setIsLoading(true);
-        const response = await fetch(
-          'https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd'
-        );
+        const response = await fetch('/api/eth-price');
         
         if (!response.ok) {
           throw new Error('Failed to fetch ETH price');

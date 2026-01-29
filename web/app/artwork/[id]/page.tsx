@@ -30,6 +30,14 @@ export default function ArtworkPage() {
   const [newForSale, setNewForSale] = useState(true);
   
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageUrl, setImageUrl] = useState('');
+
+  // Update image URL when artwork loads
+  useEffect(() => {
+    if (artwork?.ipfsHash) {
+      setImageUrl(getIPFSUrl(artwork.ipfsHash));
+    }
+  }, [artwork?.ipfsHash]);
 
   // Record view when page loads
   useEffect(() => {
@@ -63,7 +71,6 @@ export default function ArtworkPage() {
     );
   }
 
-  const [imageUrl, setImageUrl] = useState(() => getIPFSUrl(artwork.ipfsHash));
   const isOwner = owner && address && owner.toLowerCase() === address.toLowerCase();
   const _isArtist = artwork.artist.toLowerCase() === address?.toLowerCase();
   const isGif = artwork.mediaType === 'image/gif';

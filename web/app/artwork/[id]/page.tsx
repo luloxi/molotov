@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { useArtwork, useTokenOwner, useArtistProfile, usePurchaseArtwork, useUpdateListing } from '../../hooks/useContract';
 import { useArtworkStats } from '../../hooks/useArtworkStats';
 import { useEthPrice } from '../../hooks/useEthPrice';
-import { getIPFSUrl } from '../../services/ipfs';
+import { getIPFSUrl, getNextIPFSUrl } from '../../services/ipfs';
 import { formatPrice, truncateAddress, formatTimestamp } from '../../services/contract';
 import styles from './page.module.css';
 
@@ -63,7 +63,7 @@ export default function ArtworkPage() {
     );
   }
 
-  const imageUrl = getIPFSUrl(artwork.ipfsHash);
+  const [imageUrl, setImageUrl] = useState(() => getIPFSUrl(artwork.ipfsHash));
   const isOwner = owner && address && owner.toLowerCase() === address.toLowerCase();
   const _isArtist = artwork.artist.toLowerCase() === address?.toLowerCase();
   const isGif = artwork.mediaType === 'image/gif';
@@ -128,6 +128,10 @@ export default function ArtworkPage() {
               alt={artwork.title}
               className={`${styles.image} ${imageLoaded ? styles.loaded : ''}`}
               onLoad={() => setImageLoaded(true)}
+              onError={() => {
+                const next = getNextIPFSUrl(imageUrl);
+                if (next) setImageUrl(next);
+              }}
             />
             {isGif && <span className={styles.gifBadge}>GIF</span>}
           </div>

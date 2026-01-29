@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAccount } from 'wagmi';
 import { Artwork } from '../../types';
-import { getIPFSUrl } from '../../services/ipfs';
+import { getIPFSUrl, getNextIPFSUrl } from '../../services/ipfs';
 import { formatPrice, truncateAddress } from '../../services/contract';
 import { useArtistProfile } from '../../hooks/useContract';
 import { useEthPrice } from '../../hooks/useEthPrice';
@@ -33,7 +33,7 @@ export function ArtworkCard({ artwork, showArtist = true }: ArtworkCardProps) {
   const { data: artistProfile } = useArtistProfile(artwork.artist);
   const artistName = artistProfile?.name || truncateAddress(artwork.artist);
   
-  const imageUrl = getIPFSUrl(artwork.ipfsHash);
+  const [imageUrl, setImageUrl] = useState(() => getIPFSUrl(artwork.ipfsHash));
   const tokenIdStr = artwork.tokenId.toString();
   
   // Fetch stats on mount
@@ -146,7 +146,14 @@ export function ArtworkCard({ artwork, showArtist = true }: ArtworkCardProps) {
             alt={artwork.title}
             className={`${styles.image} ${imageLoaded ? styles.loaded : ''}`}
             onLoad={() => setImageLoaded(true)}
-            onError={() => setImageError(true)}
+            onError={() => {
+              const next = getNextIPFSUrl(imageUrl);
+              if (next) {
+                setImageUrl(next);
+              } else {
+                setImageError(true);
+              }
+            }}
           />
         )}
       </div>

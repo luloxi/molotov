@@ -98,14 +98,33 @@ export async function uploadMetadataToIPFS(metadata: ArtworkMetadata): Promise<I
   }
 }
 
+const FALLBACK_GATEWAYS = [
+  PINATA_GATEWAY,
+  'https://ipfs.io',
+  'https://cloudflare-ipfs.com',
+  'https://dweb.link',
+];
+
 /**
  * Get IPFS gateway URL from hash
  */
-export function getIPFSUrl(hash: string): string {
+export function getIPFSUrl(hash: string, gatewayIndex = 0): string {
   if (hash.startsWith('ipfs://')) {
     hash = hash.replace('ipfs://', '');
   }
-  return `${PINATA_GATEWAY}/ipfs/${hash}`;
+  const gateway = FALLBACK_GATEWAYS[gatewayIndex] || FALLBACK_GATEWAYS[0];
+  return `${gateway}/ipfs/${hash}`;
+}
+
+/**
+ * Get next fallback URL for an IPFS hash (used on image load error)
+ */
+export function getNextIPFSUrl(currentUrl: string): string | null {
+  const currentGatewayIndex = FALLBACK_GATEWAYS.findIndex((gw) => currentUrl.startsWith(gw));
+  const nextIndex = currentGatewayIndex + 1;
+  if (nextIndex >= FALLBACK_GATEWAYS.length) return null;
+  const hash = currentUrl.replace(/^https?:\/\/[^/]+\/ipfs\//, '');
+  return `${FALLBACK_GATEWAYS[nextIndex]}/ipfs/${hash}`;
 }
 
 /**

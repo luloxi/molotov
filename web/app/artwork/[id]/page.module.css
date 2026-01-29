@@ -430,6 +430,17 @@
   word-break: break-word;
 }
 
+.attributesLoading,
+.attributesError {
+  font-size: 0.875rem;
+  color: var(--text-secondary, #888);
+  margin: 0;
+}
+
+.attributesError {
+  color: var(--error, #ef4444);
+}
+
 .priceSection {
   padding: 24px;
   background: var(--card-bg, #1a1a2e);

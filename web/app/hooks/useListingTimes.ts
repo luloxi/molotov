@@ -48,24 +48,46 @@ export function useListingTimes() {
         const currentBlock = await publicClient.getBlockNumber();
         const currentTime = Date.now();
         
-        // Look back up to 45,000 blocks (~1 day on Base Sepolia)
-        const fromBlock = currentBlock > BigInt(45000) ? currentBlock - BigInt(45000) : BigInt(0);
+        // Contract deployment block on Base Sepolia (from broadcast/DeployMolotov.s.sol/84532/run-latest.json)
+        // 0x2337baf = 36895663 in decimal
+        const DEPLOYMENT_BLOCK = BigInt(36895663);
+        const fromBlock = DEPLOYMENT_BLOCK;
 
-        // Fetch mint events and price update events in parallel
-        const [mintLogs, priceUpdateLogs] = await Promise.all([
-          publicClient.getLogs({
-            address: contractAddress,
-            event: parseAbiItem('event ArtworkMinted(uint256 indexed tokenId, address indexed artist, string title, string ipfsHash, uint256 price)'),
-            fromBlock,
-            toBlock: currentBlock,
-          }),
-          publicClient.getLogs({
-            address: contractAddress,
-            event: parseAbiItem('event ArtworkPriceUpdated(uint256 indexed tokenId, uint256 oldPrice, uint256 newPrice, bool isForSale)'),
-            fromBlock,
-            toBlock: currentBlock,
-          }),
-        ]);
+        // RPC providers limit block range queries (typically 50,000 blocks max)
+        // We need to chunk our requests
+        const MAX_BLOCK_RANGE = BigInt(45000);
+        const mintLogs: Awaited<ReturnType<typeof publicClient.getLogs>>[] = [];
+        const priceUpdateLogs: Awaited<ReturnType<typeof publicClient.getLogs>>[] = [];
+        
+        // Fetch in chunks
+        let chunkStart = fromBlock;
+        while (chunkStart <= currentBlock) {
+          const chunkEnd = chunkStart + MAX_BLOCK_RANGE > currentBlock 
+            ? currentBlock 
+            : chunkStart + MAX_BLOCK_RANGE;
+          
+          console.log(`[useListingTimes] Fetching chunk: ${chunkStart.toString()} to ${chunkEnd.toString()}`);
+          
+          const [mintChunk, priceChunk] = await Promise.all([
+            publicClient.getLogs({
+              address: contractAddress,
+              event: parseAbiItem('event ArtworkMinted(uint256 indexed tokenId, address indexed artist, string title, string ipfsHash, uint256 price)'),
+              fromBlock: chunkStart,
+              toBlock: chunkEnd,
+            }),
+            publicClient.getLogs({
+              address: contractAddress,
+              event: parseAbiItem('event ArtworkPriceUpdated(uint256 indexed tokenId, uint256 oldPrice, uint256 newPrice, bool isForSale)'),
+              fromBlock: chunkStart,
+              toBlock: chunkEnd,
+            }),
+          ]);
+          
+          mintLogs.push(...mintChunk);
+          priceUpdateLogs.push(...priceChunk);
+          
+          chunkStart = chunkEnd + BigInt(1);
+        }
 
         const timesMap = new Map<string, ListingTime>();
 
@@ -75,6 +97,14 @@ export function useListingTimes() {
           return currentTime - (blockDiff * 2000); // ~2 seconds per block
         };
 
+        console.log('[useListingTimes] Fetched events (chunked):', {
+          mintLogs: mintLogs.length,
+          priceUpdateLogs: priceUpdateLogs.length,
+          fromBlock: fromBlock.toString(),
+          currentBlock: currentBlock.toString(),
+          blockRange: (currentBlock - fromBlock).toString(),
+        });
+
         // Process mint events - these are listings at creation time
         // Note: We assume all minted artworks were initially listed
         // The actual isForSale status at mint isn't in the event, so we track all mints
@@ -83,6 +113,7 @@ export function useListingTimes() {
           const blockNumber = log.blockNumber || BigInt(0);
           const timestamp = estimateTimestamp(blockNumber);
           
+          console.log('[useListingTimes] Mint event:', { tokenId, blockNumber: blockNumber.toString(), timestamp, date: new Date(timestamp).toISOString() });
           timesMap.set(tokenId, { tokenId, timestamp, blockNumber });
         }
 
@@ -90,6 +121,12 @@ export function useListingTimes() {
         // Only count listings where isForSale is true
         for (const log of priceUpdateLogs) {
           const args = log.args as { tokenId: bigint; oldPrice: bigint; newPrice: bigint; isForSale: boolean };
+          
+          console.log('[useListingTimes] PriceUpdate event:', { 
+            tokenId: args.tokenId.toString(), 
+            isForSale: args.isForSale,
+            blockNumber: log.blockNumber?.toString()
+          });
           
           // Only track when artwork is being listed (isForSale = true)
           if (!args.isForSale) continue;
@@ -102,9 +139,17 @@ export function useListingTimes() {
           
           // Use this event if it's more recent than the existing one
           if (!existing || blockNumber > existing.blockNumber) {
+            console.log('[useListingTimes] Updating listing time for token', tokenId, 'to', new Date(timestamp).toISOString());
             timesMap.set(tokenId, { tokenId, timestamp, blockNumber });
           }
         }
+
+        console.log('[useListingTimes] Final timesMap:', Array.from(timesMap.entries()).map(([k, v]) => ({
+          tokenId: k,
+          timestamp: v.timestamp,
+          date: new Date(v.timestamp).toISOString(),
+          blockNumber: v.blockNumber.toString()
+        })));
 
         setListingTimes(timesMap);
       } catch (err) {

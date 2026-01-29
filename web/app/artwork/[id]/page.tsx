@@ -40,6 +40,8 @@ export default function ArtworkPage() {
   const [avatarUrl, setAvatarUrl] = useState('');
   const [avatarError, setAvatarError] = useState(false);
   const [attributes, setAttributes] = useState<ArtworkAttribute[]>([]);
+  const [attributesLoading, setAttributesLoading] = useState(false);
+  const [attributesError, setAttributesError] = useState(false);
 
   // Update image URL when artwork loads
   useEffect(() => {
@@ -56,28 +58,54 @@ export default function ArtworkPage() {
     }
   }, [artistProfile?.profileImageHash]);
 
-  // Fetch metadata from IPFS to get attributes
+  // Fetch metadata from IPFS to get attributes (with fallback gateways)
   useEffect(() => {
     const fetchMetadata = async () => {
       if (!artwork?.metadataHash) return;
       
-      try {
-        const metadataUrl = getIPFSUrl(artwork.metadataHash);
-        const response = await fetch(metadataUrl);
-        if (response.ok) {
-          const metadata = await response.json();
-          if (metadata.attributes && Array.isArray(metadata.attributes)) {
-            // Filter out system attributes that are already displayed elsewhere
-            const systemTraits = ['Artist', 'Edition', 'Media Type'];
-            const customAttributes = metadata.attributes.filter(
-              (attr: ArtworkAttribute) => !systemTraits.includes(attr.trait_type)
-            );
-            setAttributes(customAttributes);
+      setAttributesLoading(true);
+      setAttributesError(false);
+      console.log('[ArtworkPage] Fetching metadata for hash:', artwork.metadataHash);
+      
+      // Try multiple gateways
+      const maxGatewayAttempts = 4;
+      for (let gatewayIndex = 0; gatewayIndex < maxGatewayAttempts; gatewayIndex++) {
+        try {
+          const metadataUrl = getIPFSUrl(artwork.metadataHash, gatewayIndex);
+          console.log(`[ArtworkPage] Trying gateway ${gatewayIndex}:`, metadataUrl);
+          
+          const response = await fetch(metadataUrl, {
+            signal: AbortSignal.timeout(10000), // 10 second timeout per gateway
+          });
+          
+          if (response.ok) {
+            const metadata = await response.json();
+            console.log('[ArtworkPage] Metadata fetched successfully:', metadata);
+            
+            if (metadata.attributes && Array.isArray(metadata.attributes)) {
+              // Filter out system attributes that are already displayed elsewhere
+              const systemTraits = ['Artist', 'Edition', 'Media Type'];
+              const customAttributes = metadata.attributes.filter(
+                (attr: ArtworkAttribute) => !systemTraits.includes(attr.trait_type)
+              );
+              console.log('[ArtworkPage] Custom attributes found:', customAttributes);
+              setAttributes(customAttributes);
+            } else {
+              console.log('[ArtworkPage] No attributes array in metadata');
+            }
+            setAttributesLoading(false);
+            return; // Success, exit the loop
+          } else {
+            console.warn(`[ArtworkPage] Gateway ${gatewayIndex} returned status:`, response.status);
           }
+        } catch (error) {
+          console.warn(`[ArtworkPage] Gateway ${gatewayIndex} failed:`, error);
         }
-      } catch (error) {
-        console.error('Failed to fetch metadata:', error);
       }
+      
+      console.error('[ArtworkPage] All gateways failed to fetch metadata');
+      setAttributesLoading(false);
+      setAttributesError(true);
     };
     
     fetchMetadata();
@@ -350,7 +378,12 @@ export default function ArtworkPage() {
             </div>
           </div>
           
-          {attributes.length > 0 && (
+          {attributesLoading ? (
+            <div className={styles.attributesSection}>
+              <h3>Attributes</h3>
+              <p className={styles.attributesLoading}>Loading attributes...</p>
+            </div>
+          ) : attributes.length > 0 ? (
             <div className={styles.attributesSection}>
               <h3>Attributes</h3>
               <div className={styles.attributesGrid}>
@@ -362,7 +395,12 @@ export default function ArtworkPage() {
                 ))}
               </div>
             </div>
-          )}
+          ) : attributesError ? (
+            <div className={styles.attributesSection}>
+              <h3>Attributes</h3>
+              <p className={styles.attributesError}>Failed to load attributes from IPFS</p>
+            </div>
+          ) : null}
           
           <div className={styles.priceSection}>
             {artwork.isForSale ? (

@@ -11,13 +11,16 @@ interface GalleryGridProps {
   isLoading?: boolean;
   title?: string;
   showFilters?: boolean;
+  /** Optional function to get listing time for an artwork (used for "newest" sort) */
+  getListingTime?: (tokenId: string | bigint) => number | undefined;
 }
 
 export function GalleryGrid({ 
   artworks, 
   isLoading = false, 
   title,
-  showFilters = true 
+  showFilters = true,
+  getListingTime
 }: GalleryGridProps) {
   const [filters, setFilters] = useState<GalleryFilters>({
     sortBy: 'newest',
@@ -55,10 +58,20 @@ export function GalleryGrid({
     // Sort
     switch (filters.sortBy) {
       case 'newest':
-        result.sort((a, b) => Number(b.createdAt - a.createdAt));
+        // Use listing time if available (when artwork was listed/re-listed for sale)
+        // Falls back to createdAt if no listing time found
+        result.sort((a, b) => {
+          const aTime = getListingTime?.(a.tokenId) ?? Number(a.createdAt) * 1000;
+          const bTime = getListingTime?.(b.tokenId) ?? Number(b.createdAt) * 1000;
+          return bTime - aTime;
+        });
         break;
       case 'oldest':
-        result.sort((a, b) => Number(a.createdAt - b.createdAt));
+        result.sort((a, b) => {
+          const aTime = getListingTime?.(a.tokenId) ?? Number(a.createdAt) * 1000;
+          const bTime = getListingTime?.(b.tokenId) ?? Number(b.createdAt) * 1000;
+          return aTime - bTime;
+        });
         break;
       case 'price_asc':
         result.sort((a, b) => Number(a.price - b.price));
@@ -69,7 +82,7 @@ export function GalleryGrid({
     }
 
     return result;
-  }, [artworks, filters]);
+  }, [artworks, filters, getListingTime]);
 
   if (isLoading) {
     return (

@@ -18,22 +18,36 @@ export default function Home() {
   const { data: artworksData, isLoading: artworksLoading } = useArtworksForSale();
   const { data: artistsData } = useAllArtists();
   const { data: totalSupply } = useTotalSupply();
-  const { getListingTime, listingTimes, isLoading: listingTimesLoading } = useListingTimes();
+  const { getListingTime, listingTimes } = useListingTimes();
 
   const artworks = (artworksData as Artwork[]) || [];
-  
-  // Sort artworks by listing time descending (most recently listed first)
-  // Listing time = when artwork was created OR when it was put for sale (whichever is more recent)
-  // Falls back to createdAt if no listing event found
-  const sortedArtworks = useMemo(() => {
-    return [...artworks].sort((a, b) => {
-      const aListingTime = getListingTime(a.tokenId) ?? Number(a.createdAt) * 1000;
-      const bListingTime = getListingTime(b.tokenId) ?? Number(b.createdAt) * 1000;
-      return bListingTime - aListingTime;
-    });
-  }, [artworks, getListingTime, listingTimes]);
   const artistCount = (artistsData as string[])?.length || 0;
   const nftCount = totalSupply ? Number(totalSupply) : 0;
+
+  // Sort artworks by listing time (most recently listed first) before taking top 8
+  const featuredArtworks = useMemo(() => {
+    console.log('[Home] Sorting artworks. Count:', artworks.length, 'ListingTimes size:', listingTimes.size);
+    
+    const sorted = [...artworks]
+      .map(a => {
+        const listingTime = getListingTime(a.tokenId);
+        const fallbackTime = Number(a.createdAt) * 1000;
+        const effectiveTime = listingTime ?? fallbackTime;
+        console.log('[Home] Artwork', a.tokenId.toString(), a.title, {
+          listingTime: listingTime ? new Date(listingTime).toISOString() : 'none',
+          createdAt: new Date(fallbackTime).toISOString(),
+          effectiveTime: new Date(effectiveTime).toISOString(),
+          usingListingTime: !!listingTime
+        });
+        return { artwork: a, effectiveTime };
+      })
+      .sort((a, b) => b.effectiveTime - a.effectiveTime)
+      .map(item => item.artwork)
+      .slice(0, 8);
+    
+    console.log('[Home] Sorted order:', sorted.map(a => ({ id: a.tokenId.toString(), title: a.title })));
+    return sorted;
+  }, [artworks, getListingTime, listingTimes]);
 
   return (
     <div className={styles.container}>
@@ -97,7 +111,7 @@ export default function Home() {
             </Link>
           </div>
           <GalleryGrid 
-            artworks={sortedArtworks.slice(0, 8)} 
+            artworks={featuredArtworks} 
             isLoading={artworksLoading}
             showFilters={false}
           />

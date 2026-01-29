@@ -159,6 +159,13 @@ export function MintForm({ onSuccess: _onSuccess }: MintFormProps) {
       return;
     }
     
+    // Auto-add any pending attribute that hasn't been added yet
+    let finalAttributes = [...formData.attributes];
+    if (newAttribute.trait_type.trim() && newAttribute.value.toString().trim()) {
+      finalAttributes.push({ ...newAttribute });
+      setNewAttribute({ trait_type: '', value: '' });
+    }
+    
     try {
       setIsUploading(true);
       
@@ -185,7 +192,7 @@ export function MintForm({ onSuccess: _onSuccess }: MintFormProps) {
           number: formData.editionNumber,
           total: formData.totalEditions,
         },
-        formData.attributes
+        finalAttributes
       );
       
       setUploadProgress('Uploading metadata to IPFS...');
@@ -349,13 +356,18 @@ export function MintForm({ onSuccess: _onSuccess }: MintFormProps) {
             </label>
             <div className={styles.priceInputWrapper}>
               <input
-                type="number"
+                type="text"
+                inputMode="decimal"
                 value={formData.price}
-                onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  // Allow empty, or valid decimal with max 5 decimal places
+                  if (value === '' || /^\d*\.?\d{0,5}$/.test(value)) {
+                    setFormData(prev => ({ ...prev, price: value }));
+                  }
+                }}
                 placeholder="0.01"
                 className={styles.input}
-                min="0"
-                step="0.00001"
               />
               {formData.price && convertEthToUsd(formData.price) && (
                 <span className={styles.usdConversion}>

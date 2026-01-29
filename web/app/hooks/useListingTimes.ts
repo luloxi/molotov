@@ -56,8 +56,15 @@ export function useListingTimes() {
         // RPC providers limit block range queries (typically 50,000 blocks max)
         // We need to chunk our requests
         const MAX_BLOCK_RANGE = BigInt(45000);
-        const mintLogs: Awaited<ReturnType<typeof publicClient.getLogs>>[] = [];
-        const priceUpdateLogs: Awaited<ReturnType<typeof publicClient.getLogs>>[] = [];
+        
+        const mintEvent = parseAbiItem('event ArtworkMinted(uint256 indexed tokenId, address indexed artist, string title, string ipfsHash, uint256 price)');
+        const priceUpdateEvent = parseAbiItem('event ArtworkPriceUpdated(uint256 indexed tokenId, uint256 oldPrice, uint256 newPrice, bool isForSale)');
+        
+        type MintLog = Awaited<ReturnType<typeof publicClient.getLogs<typeof mintEvent>>>[number];
+        type PriceUpdateLog = Awaited<ReturnType<typeof publicClient.getLogs<typeof priceUpdateEvent>>>[number];
+        
+        const mintLogs: MintLog[] = [];
+        const priceUpdateLogs: PriceUpdateLog[] = [];
         
         // Fetch in chunks
         let chunkStart = fromBlock;
@@ -71,13 +78,13 @@ export function useListingTimes() {
           const [mintChunk, priceChunk] = await Promise.all([
             publicClient.getLogs({
               address: contractAddress,
-              event: parseAbiItem('event ArtworkMinted(uint256 indexed tokenId, address indexed artist, string title, string ipfsHash, uint256 price)'),
+              event: mintEvent,
               fromBlock: chunkStart,
               toBlock: chunkEnd,
             }),
             publicClient.getLogs({
               address: contractAddress,
-              event: parseAbiItem('event ArtworkPriceUpdated(uint256 indexed tokenId, uint256 oldPrice, uint256 newPrice, bool isForSale)'),
+              event: priceUpdateEvent,
               fromBlock: chunkStart,
               toBlock: chunkEnd,
             }),

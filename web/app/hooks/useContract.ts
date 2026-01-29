@@ -178,7 +178,8 @@ export function useArtworks(tokenIds: bigint[] | undefined) {
         
         const client = createPublicClient({
           chain: baseSepolia,
-          transport: http(),
+          // Use PublicNode's free RPC as fallback since other RPCs can be unreliable or require API keys
+          transport: http(process.env.NEXT_PUBLIC_BASE_SEPOLIA_RPC || 'https://base-sepolia-rpc.publicnode.com'),
         });
 
         const results = await Promise.all(
@@ -250,10 +251,34 @@ export function useRegisterArtist() {
 export function useMintArtwork() {
   const contractAddress = useContractAddress();
   const { writeContract, data: hash, isPending, error } = useWriteContract();
+  const [mintedTokenId, setMintedTokenId] = useState<string | null>(null);
   
-  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
+  const { isLoading: isConfirming, isSuccess, data: receipt } = useWaitForTransactionReceipt({
     hash,
   });
+
+  // Extract tokenId from receipt logs when transaction succeeds
+  useEffect(() => {
+    if (isSuccess && receipt && receipt.logs.length > 0) {
+      // The Transfer event is emitted on mint with (from: 0x0, to: minter, tokenId)
+      // The tokenId is typically in the third topic of the Transfer event
+      for (const log of receipt.logs) {
+        if (log.topics.length >= 4) {
+          // ERC721 Transfer event: Transfer(address from, address to, uint256 tokenId)
+          // topics[0] = event signature
+          // topics[1] = from (indexed)
+          // topics[2] = to (indexed)
+          // topics[3] = tokenId (indexed)
+          const tokenIdHex = log.topics[3];
+          if (tokenIdHex) {
+            const tokenId = BigInt(tokenIdHex).toString();
+            setMintedTokenId(tokenId);
+            break;
+          }
+        }
+      }
+    }
+  }, [isSuccess, receipt]);
   
   const mint = (
     title: string,
@@ -269,6 +294,8 @@ export function useMintArtwork() {
   ) => {
     if (!contractAddress) return;
     
+    // Reset tokenId for new mint
+    setMintedTokenId(null);
     const priceWei = parseEther(priceEth || '0');
     
     writeContract({
@@ -297,6 +324,7 @@ export function useMintArtwork() {
     isPending,
     isConfirming,
     isSuccess,
+    mintedTokenId,
     error,
   };
 }

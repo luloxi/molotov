@@ -155,7 +155,7 @@ export function createArtworkMetadata(
  * Validate file for upload
  */
 export function validateArtworkFile(file: File): { valid: boolean; error?: string } {
-  const maxSize = 50 * 1024 * 1024; // 50MB
+  const maxSize = 10 * 1024 * 1024; // 10MB
   const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'video/mp4'];
   
   if (!allowedTypes.includes(file.type)) {

@@ -239,7 +239,7 @@ export function getContractAddress(chainId: number): `0x${string}` | null {
  */
 export function formatPrice(priceWei: bigint): string {
   const eth = Number(priceWei) / 1e18;
-  return eth.toFixed(eth < 0.001 ? 6 : 4);
+  return eth.toFixed(eth < 0.0001 ? 7 : 5);
 }
 
 /**

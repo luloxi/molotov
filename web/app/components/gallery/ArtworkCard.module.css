@@ -1,23 +1,30 @@
 .card {
   display: block;
   background: var(--card-bg, #1a1a2e);
-  border-radius: 16px;
+  border-radius: 12px;
   overflow: hidden;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), 
+              box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   text-decoration: none;
   color: inherit;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--border-light, rgba(255, 255, 255, 0.06));
 }
 
 .card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+  transform: translateY(-6px) scale(1.01);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+.card:active {
+  transform: translateY(-2px) scale(0.99);
 }
 
 .imageContainer {
   position: relative;
   width: 100%;
   aspect-ratio: 1;
-  background: var(--skeleton-bg, #2a2a4e);
+  background: var(--skeleton-bg, #1a1a2e);
   overflow: hidden;
 }
 
@@ -25,13 +32,14 @@
   position: absolute;
   inset: 0;
   background: linear-gradient(
-    90deg,
+    110deg,
     var(--skeleton-bg, #2a2a4e) 0%,
-    var(--skeleton-shine, #3a3a5e) 50%,
+    var(--skeleton-shine, #3a3a5e) 40%,
+    var(--skeleton-shine, #3a3a5e) 60%,
     var(--skeleton-bg, #2a2a4e) 100%
   );
   background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
+  animation: shimmer 1.8s ease-in-out infinite;
 }
 
 @keyframes shimmer {
@@ -43,8 +51,8 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  opacity: 0;
-  transition: opacity 0.3s ease;
+  opacity: 0.15;
+  transition: opacity 0.4s ease;
 }
 
 .image.loaded {
@@ -62,38 +70,30 @@
   font-size: 0.875rem;
 }
 
-.gifBadge,
-.forSaleBadge {
-  position: absolute;
-  top: 12px;
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-}
-
 .gifBadge {
-  right: 12px;
-  background: rgba(138, 43, 226, 0.9);
-  color: white;
-}
-
-.forSaleBadge {
-  left: 12px;
-  background: rgba(34, 197, 94, 0.9);
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  backdrop-filter: blur(8px);
+  background: rgba(138, 43, 226, 0.85);
   color: white;
 }
 
 .info {
-  padding: 16px;
+  padding: 14px 16px 16px;
 }
 
 .title {
-  margin: 0 0 4px;
-  font-size: 1rem;
+  margin: 0 0 6px;
+  font-size: 0.9375rem;
   font-weight: 600;
-  line-height: 1.4;
+  line-height: 1.35;
   letter-spacing: -0.01em;
   white-space: nowrap;
   overflow: hidden;
@@ -102,34 +102,151 @@
 }
 
 .artist {
-  margin: 0 0 12px;
-  font-size: 0.875rem;
-  line-height: 1.5;
-  letter-spacing: -0.01em;
-  color: var(--text-secondary, #888);
+  margin: 0 0 10px;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  letter-spacing: 0;
+  color: var(--text-muted, #888);
+}
+
+/* Stats row */
+.statsRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.statItem {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.75rem;
+  color: var(--text-muted, #999);
+}
+
+.statItem svg {
+  opacity: 0.7;
 }
 
 .footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-light, rgba(255, 255, 255, 0.06));
+}
+
+.priceInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.forSaleTag {
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--success, #059669);
+  background: var(--success-light, rgba(5, 150, 105, 0.12));
+  padding: 3px 6px;
+  border-radius: 4px;
+}
+
+.priceContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .price {
-  font-size: 1rem;
+  font-size: 0.875rem;
   font-weight: 700;
-  color: var(--accent, #6366f1);
+  color: var(--text-primary, #111);
+  letter-spacing: -0.01em;
+}
+
+.usdPrice {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--text-muted, #888);
 }
 
 .notForSale {
-  font-size: 0.875rem;
-  color: var(--text-muted, #666);
+  font-size: 0.75rem;
+  color: var(--text-muted, #999);
 }
 
 .edition {
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
   color: var(--text-secondary, #888);
-  background: var(--edition-bg, rgba(255, 255, 255, 0.1));
-  padding: 2px 8px;
-  border-radius: 12px;
+  background: var(--edition-bg, rgba(255, 255, 255, 0.08));
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+/* Action buttons */
+.actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-light, rgba(255, 255, 255, 0.06));
+}
+
+.actionButton {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 10px;
+  background: var(--bg-secondary, #f5f5f7);
+  border: none;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-secondary, #555);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.actionButton:hover {
+  background: var(--accent-subtle, rgba(37, 99, 235, 0.08));
+  color: var(--accent, #2563eb);
+}
+
+.actionButton:active {
+  transform: scale(0.97);
+}
+
+.actionButton.liked {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.actionButton.liked:hover {
+  background: rgba(239, 68, 68, 0.15);
+}
+
+.actionButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+  .actions {
+    gap: 6px;
+  }
+  
+  .actionButton {
+    padding: 7px 8px;
+    font-size: 0.6875rem;
+  }
+  
+  .actionButton span {
+    display: none;
+  }
 }

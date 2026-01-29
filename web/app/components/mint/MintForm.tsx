@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useAccount } from 'wagmi';
 import { useMintArtwork, useArtistProfile } from '../../hooks/useContract';
 import { useEthPrice } from '../../hooks/useEthPrice';
+import { useCategories } from '../../hooks/useCategories';
 import { uploadFileToIPFS, uploadMetadataToIPFS, validateArtworkFile, createArtworkMetadata } from '../../services/ipfs';
-import { MintFormData } from '../../types';
+import { MintFormData, Category } from '../../types';
 import { InfoTooltip } from './InfoTooltip';
 import styles from './MintForm.module.css';
 
@@ -17,6 +18,7 @@ export function MintForm({ onSuccess: _onSuccess }: MintFormProps) {
   const { address } = useAccount();
   const { data: artistProfile } = useArtistProfile(address);
   const { convertEthToUsd } = useEthPrice();
+  const { categories: availableCategories, isLoading: categoriesLoading } = useCategories();
   
   const [formData, setFormData] = useState<MintFormData>({
     title: '',
@@ -30,19 +32,53 @@ export function MintForm({ onSuccess: _onSuccess }: MintFormProps) {
     attributes: [],
   });
   
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [mediaType, setMediaType] = useState<string>('');
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
   const [newAttribute, setNewAttribute] = useState({ trait_type: '', value: '' });
+  const [categoriesSaved, setCategoriesSaved] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   
-  const { mint, isPending, isConfirming, isSuccess, hash, error: txError } = useMintArtwork();
+  const { mint, isPending, isConfirming, isSuccess, hash, mintedTokenId, error: txError } = useMintArtwork();
 
-  const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const toggleCategory = (categoryId: string) => {
+    setSelectedCategories((prev) =>
+      prev.includes(categoryId)
+        ? prev.filter((id) => id !== categoryId)
+        : [...prev, categoryId]
+    );
+  };
+
+  // After successful mint, add categories to the artwork
+  useEffect(() => {
+    const addCategoriesToMintedArtwork = async () => {
+      if (isSuccess && mintedTokenId && selectedCategories.length > 0 && !categoriesSaved) {
+        try {
+          const response = await fetch(`/api/artwork/${mintedTokenId}/categories`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ categoryIds: selectedCategories }),
+          });
+          
+          if (response.ok) {
+            setCategoriesSaved(true);
+            console.log('Categories saved for artwork:', mintedTokenId);
+          } else {
+            console.error('Failed to save categories');
+          }
+        } catch (err) {
+          console.error('Error saving categories:', err);
+        }
+      }
+    };
     
+    addCategoriesToMintedArtwork();
+  }, [isSuccess, mintedTokenId, selectedCategories, categoriesSaved]);
+
+  const processFile = useCallback((file: File) => {
     const validation = validateArtworkFile(file);
     if (!validation.valid) {
       setError(validation.error || 'Invalid file');
@@ -54,6 +90,42 @@ export function MintForm({ onSuccess: _onSuccess }: MintFormProps) {
     setPreviewUrl(URL.createObjectURL(file));
     setError(null);
   }, []);
+
+  const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    processFile(file);
+  }, [processFile]);
+
+  const handleDragEnter = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // Only set dragging to false if we're leaving the drop zone entirely
+    if (e.currentTarget.contains(e.relatedTarget as Node)) return;
+    setIsDragging(false);
+  }, []);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      processFile(file);
+    }
+  }, [processFile]);
 
   const addAttribute = () => {
     if (!newAttribute.trait_type.trim() || !newAttribute.value.toString().trim()) return;
@@ -152,18 +224,36 @@ export function MintForm({ onSuccess: _onSuccess }: MintFormProps) {
   if (isSuccess && hash) {
     return (
       <div className={styles.success}>
-        <svg width="64" height="64" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
-        </svg>
-        <h2>Artwork Minted!</h2>
-        <p>{formData.title} has been successfully minted.</p>
+        {previewUrl && (
+          <div className={styles.successArtwork}>
+            {mediaType.startsWith('video') ? (
+              <video src={previewUrl} className={styles.successImage} muted loop autoPlay />
+            ) : (
+              <img src={previewUrl} alt={formData.title} className={styles.successImage} />
+            )}
+          </div>
+        )}
+        <div className={styles.successBadge}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+          </svg>
+          <span>Minted</span>
+        </div>
+        <h2 className={styles.successTitle}>{formData.title}</h2>
+        <p>Your artwork is now live on the blockchain</p>
+        <a 
+          href={`/artwork/${mintedTokenId}`}
+          className={styles.viewArtworkLink}
+        >
+          View Artwork
+        </a>
         <a 
           href={`https://basescan.org/tx/${hash}`} 
           target="_blank" 
           rel="noopener noreferrer"
           className={styles.txLink}
         >
-          View transaction
+          View transaction on Basescan
         </a>
       </div>
     );
@@ -173,24 +263,31 @@ export function MintForm({ onSuccess: _onSuccess }: MintFormProps) {
     <form onSubmit={handleSubmit} className={styles.form}>
       <h2 className={styles.title}>Mint New Artwork</h2>
       
-      <div className={styles.uploadSection}>
+      <div 
+        className={styles.uploadSection}
+        onDragEnter={handleDragEnter}
+        onDragLeave={handleDragLeave}
+        onDragOver={handleDragOver}
+        onDrop={handleDrop}
+      >
         <label className={styles.uploadLabel}>
           {previewUrl ? (
-            <div className={styles.previewContainer}>
+            <div className={`${styles.previewContainer} ${isDragging ? styles.dragging : ''}`}>
               {mediaType.startsWith('video') ? (
                 <video src={previewUrl} className={styles.preview} muted loop autoPlay />
               ) : (
                 <img src={previewUrl} alt="Preview" className={styles.preview} />
               )}
-              <span className={styles.changeText}>Click to change</span>
+              <span className={styles.changeText}>{isDragging ? 'Drop to replace' : 'Click to change'}</span>
             </div>
           ) : (
-            <div className={styles.uploadPlaceholder}>
+            <div className={`${styles.uploadPlaceholder} ${isDragging ? styles.dragging : ''}`}>
               <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
               </svg>
-              <span>Upload Artwork</span>
-              <span className={styles.fileTypes}>JPG, PNG, GIF (max 50MB)</span>
+              <span>{isDragging ? 'Drop your artwork here' : 'Upload Artwork'}</span>
+              <span className={`${styles.fileTypes} ${styles.dragHint}`}>{isDragging ? '' : 'Drag & drop or click to browse'}</span>
+              <span className={styles.fileTypes}>JPG, PNG, GIF (max 10MB)</span>
             </div>
           )}
           <input
@@ -200,6 +297,10 @@ export function MintForm({ onSuccess: _onSuccess }: MintFormProps) {
             className={styles.fileInput}
           />
         </label>
+        <div className={styles.ipfsNote}>
+          <span className={styles.ipfsIcon}>✦</span>
+          <span>Your artwork is stored forever on <strong>IPFS</strong> <span className={styles.ipfsSubtext}>· InterPlanetary File System</span></span>
+        </div>
       </div>
       
       <div className={styles.field}>
@@ -248,7 +349,7 @@ export function MintForm({ onSuccess: _onSuccess }: MintFormProps) {
           <div className={styles.field}>
             <label className={styles.label}>
               Price (ETH)
-              <InfoTooltip text="Set your asking price in ETH. You can price as low as 0.0001 ETH for accessible art." />
+              <InfoTooltip text="Set your asking price in ETH. You can price as low as 0.00001 ETH for accessible art." />
             </label>
             <div className={styles.priceInputWrapper}>
               <input
@@ -258,7 +359,7 @@ export function MintForm({ onSuccess: _onSuccess }: MintFormProps) {
                 placeholder="0.01"
                 className={styles.input}
                 min="0"
-                step="0.0001"
+                step="0.00001"
               />
               {formData.price && convertEthToUsd(formData.price) && (
                 <span className={styles.usdConversion}>
@@ -315,6 +416,40 @@ export function MintForm({ onSuccess: _onSuccess }: MintFormProps) {
         </div>
       </div>
       
+      <div className={styles.categoriesSection}>
+        <h3 className={styles.sectionTitle}>
+          Categories
+          <InfoTooltip text="Select one or more categories that best describe your artwork. This helps collectors discover your work in the gallery." />
+        </h3>
+        
+        <div className={styles.categoryGrid}>
+          {categoriesLoading ? (
+            <span className={styles.loadingText}>Loading categories...</span>
+          ) : (
+            availableCategories.map((cat: Category) => {
+              const isSelected = selectedCategories.includes(cat.id);
+              return (
+                <button
+                  key={cat.id}
+                  type="button"
+                  className={`${styles.categoryChip} ${isSelected ? styles.categorySelected : ''}`}
+                  onClick={() => toggleCategory(cat.id)}
+                  style={isSelected && cat.color ? { 
+                    backgroundColor: cat.color, 
+                    borderColor: cat.color,
+                    color: '#fff'
+                  } : cat.color ? {
+                    borderColor: cat.color,
+                  } : undefined}
+                >
+                  {cat.name}
+                </button>
+              );
+            })
+          )}
+        </div>
+      </div>
+
       <div className={styles.attributesSection}>
         <h3 className={styles.sectionTitle}>
           Attributes

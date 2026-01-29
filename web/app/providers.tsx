@@ -18,7 +18,8 @@ const config = createConfig({
   chains: [baseSepolia, base],
   transports: { 
     [base.id]: http(),
-    [baseSepolia.id]: http(),
+    // Use PublicNode's free RPC as fallback since other RPCs can be unreliable or require API keys
+    [baseSepolia.id]: http(process.env.NEXT_PUBLIC_BASE_SEPOLIA_RPC || 'https://base-sepolia-rpc.publicnode.com'),
   },
   connectors: [
     metaMask(),

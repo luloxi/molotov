@@ -1,66 +1,71 @@
 .container {
-  max-width: 640px;
+  max-width: 580px;
   margin: 0 auto;
-  padding: 32px 24px;
+  padding: 32px 20px 60px;
 }
 
 .header {
-  margin-bottom: 24px;
+  margin-bottom: 28px;
 }
 
 .backLink {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 16px;
-  color: var(--text-secondary, #888);
+  gap: 6px;
+  margin-bottom: 20px;
+  color: var(--text-muted, #999);
   text-decoration: none;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   transition: color 0.2s ease;
+  font-weight: 500;
 }
 
 .backLink:hover {
-  color: var(--text-primary, #fff);
+  color: var(--text-primary, #111);
 }
 
 .title {
   margin: 0;
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: var(--text-primary, #fff);
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--text-primary, #111);
+  letter-spacing: -0.03em;
 }
 
 .notConnected,
 .loading {
   text-align: center;
-  padding: 64px 24px;
-  color: var(--text-secondary, #888);
+  padding: 72px 24px;
+  color: var(--text-muted, #999);
 }
 
 .notConnected svg,
 .loading svg {
-  opacity: 0.5;
-  margin-bottom: 16px;
+  opacity: 0.4;
+  margin-bottom: 20px;
 }
 
 .notConnected h1 {
-  margin: 0 0 8px;
-  font-size: 1.5rem;
-  color: var(--text-primary, #fff);
+  margin: 0 0 10px;
+  font-size: 1.375rem;
+  color: var(--text-primary, #111);
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 .notConnected p {
   margin: 0;
+  font-size: 0.9375rem;
 }
 
 .spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid var(--border, #333);
-  border-top-color: var(--accent, #6366f1);
+  width: 36px;
+  height: 36px;
+  border: 2px solid var(--border-light, rgba(0, 0, 0, 0.08));
+  border-top-color: var(--accent, #2563eb);
   border-radius: 50%;
   animation: spin 1s linear infinite;
-  margin: 0 auto 16px;
+  margin: 0 auto 14px;
 }
 
 @keyframes spin {
@@ -70,10 +75,14 @@
 
 @media (max-width: 640px) {
   .container {
-    padding: 24px 16px;
+    padding: 24px 16px 48px;
   }
   
   .title {
-    font-size: 1.5rem;
+    font-size: 1.625rem;
+  }
+  
+  .header {
+    margin-bottom: 24px;
   }
 }

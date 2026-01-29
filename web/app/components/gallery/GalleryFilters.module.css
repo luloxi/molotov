@@ -1,25 +1,26 @@
 .container {
   display: flex;
   flex-wrap: wrap;
-  gap: 24px;
-  padding: 16px 20px;
-  background: var(--card-bg, #1a1a2e);
-  border-radius: 12px;
-  margin-bottom: 24px;
+  gap: 20px;
+  padding: 16px 18px;
+  background: var(--bg-secondary, #f0f0f2);
+  border-radius: 10px;
+  margin-bottom: 28px;
+  border: 1px solid var(--border-light, rgba(0, 0, 0, 0.04));
 }
 
 .filterGroup {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .label {
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--text-secondary, #888);
+  letter-spacing: 0.06em;
+  color: var(--text-muted, #999);
 }
 
 .checkbox {
@@ -27,58 +28,99 @@
   align-items: center;
   gap: 8px;
   cursor: pointer;
-  font-size: 0.875rem;
-  color: var(--text-primary, #fff);
+  font-size: 0.8125rem;
+  color: var(--text-primary, #111);
+  font-weight: 500;
 }
 
 .checkbox input {
-  width: 18px;
-  height: 18px;
-  accent-color: var(--accent, #6366f1);
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent, #2563eb);
+  border-radius: 4px;
 }
 
 .mediaTypes {
   display: flex;
-  gap: 8px;
+  gap: 6px;
+}
+
+.categoryTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-width: 400px;
+}
+
+.categoryTag {
+  padding: 5px 10px;
+  border: 1px solid var(--border, #e0e0e0);
+  background: var(--card-bg, #fff);
+  color: var(--text-secondary, #555);
+  border-radius: 16px;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.categoryTag:hover {
+  border-color: var(--accent, #2563eb);
+  color: var(--accent, #2563eb);
+}
+
+.categoryTag.selected {
+  background: var(--text-primary, #111);
+  border-color: var(--text-primary, #111);
+  color: var(--bg-primary, #fff);
+}
+
+.loadingText {
+  font-size: 0.75rem;
+  color: var(--text-muted, #999);
 }
 
 .mediaTypeBtn {
   padding: 6px 12px;
-  border: 1px solid var(--border, #333);
-  background: transparent;
-  color: var(--text-secondary, #888);
+  border: 1px solid var(--border, #e0e0e0);
+  background: var(--card-bg, #fff);
+  color: var(--text-secondary, #555);
   border-radius: 6px;
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 
 .mediaTypeBtn:hover {
-  border-color: var(--accent, #6366f1);
-  color: var(--accent, #6366f1);
+  border-color: var(--accent, #2563eb);
+  color: var(--accent, #2563eb);
 }
 
 .mediaTypeBtn.selected {
-  background: var(--accent, #6366f1);
-  border-color: var(--accent, #6366f1);
-  color: white;
+  background: var(--text-primary, #111);
+  border-color: var(--text-primary, #111);
+  color: var(--bg-primary, #fff);
 }
 
 .select {
   padding: 8px 12px;
-  background: var(--input-bg, #0d0d1a);
-  border: 1px solid var(--border, #333);
-  border-radius: 8px;
-  color: var(--text-primary, #fff);
-  font-size: 0.875rem;
+  background: var(--card-bg, #fff);
+  border: 1px solid var(--border, #e0e0e0);
+  border-radius: 6px;
+  color: var(--text-primary, #111);
+  font-size: 0.8125rem;
   cursor: pointer;
-  min-width: 160px;
+  min-width: 150px;
+  font-weight: 500;
 }
 
 .select:focus {
   outline: none;
-  border-color: var(--accent, #6366f1);
+  border-color: var(--accent, #2563eb);
 }
 
 .priceInputs {
@@ -88,32 +130,34 @@
 }
 
 .priceInput {
-  width: 80px;
-  padding: 8px 12px;
-  background: var(--input-bg, #0d0d1a);
-  border: 1px solid var(--border, #333);
-  border-radius: 8px;
-  color: var(--text-primary, #fff);
-  font-size: 0.875rem;
+  width: 75px;
+  padding: 8px 10px;
+  background: var(--card-bg, #fff);
+  border: 1px solid var(--border, #e0e0e0);
+  border-radius: 6px;
+  color: var(--text-primary, #111);
+  font-size: 0.8125rem;
 }
 
 .priceInput:focus {
   outline: none;
-  border-color: var(--accent, #6366f1);
+  border-color: var(--accent, #2563eb);
 }
 
 .priceInput::placeholder {
-  color: var(--text-muted, #666);
+  color: var(--text-muted, #999);
 }
 
 .priceSeparator {
-  color: var(--text-muted, #666);
+  color: var(--text-muted, #999);
+  font-size: 0.75rem;
 }
 
 @media (max-width: 768px) {
   .container {
     flex-direction: column;
-    gap: 16px;
+    gap: 14px;
+    padding: 14px 16px;
   }
   
   .filterGroup {

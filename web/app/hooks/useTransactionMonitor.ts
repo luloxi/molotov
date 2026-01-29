@@ -1,8 +1,7 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
-import { usePublicClient } from 'wagmi';
-import { parseAbiItem } from 'viem';
+import { useEffect, useState, useCallback, useMemo } from 'react';
+import { createPublicClient, http, parseAbiItem } from 'viem';
 import { TransactionEvent } from '../types';
 import { getContractAddress, MOLOTOV_NFT_ABI } from '../services/contract';
 import { baseSepolia } from 'wagmi/chains';
@@ -20,20 +19,49 @@ export function useTransactionMonitor() {
 
   const [events, setEvents] = useState<TransactionEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [artistNames, setArtistNames] = useState<ArtistNameMap>({});
 
-  // Always use a public client scoped to Base Sepolia
-  const publicClient = usePublicClient({ chainId: TARGET_CHAIN_ID });
+  // Create a stable public client that doesn't depend on wallet connection
+  // Use PublicNode's free RPC as fallback since other RPCs can be unreliable or require API keys
+  const publicClient = useMemo(() => createPublicClient({
+    chain: baseSepolia,
+    transport: http(process.env.NEXT_PUBLIC_BASE_SEPOLIA_RPC || 'https://base-sepolia-rpc.publicnode.com'),
+  }), []);
   const contractAddress = getContractAddress(TARGET_CHAIN_ID);
+  
+  // Debug: Log contract address on init
+  useEffect(() => {
+    console.log(`[TransactionMonitor] Contract address: ${contractAddress}, Chain: ${TARGET_CHAIN_ID}`);
+  }, [contractAddress, TARGET_CHAIN_ID]);
 
   // Process decoded log to TransactionEvent
-  const processLog = useCallback((log: DecodedLog, type: TransactionEvent['type']): TransactionEvent | null => {
+  // currentBlock and currentTime are used to estimate the actual event timestamp for historical events
+  // For real-time events (watchers), these can be omitted and Date.now() will be used
+  const processLog = useCallback((
+    log: DecodedLog, 
+    type: TransactionEvent['type'],
+    currentBlock?: bigint,
+    currentTime?: number
+  ): TransactionEvent | null => {
     try {
+      const eventBlock = log.blockNumber || BigInt(0);
+      let timestamp: number;
+      
+      if (currentBlock && currentTime) {
+        // Estimate timestamp based on block difference (~2 seconds per block on Base Sepolia)
+        const blockDiff = Number(currentBlock - eventBlock);
+        timestamp = currentTime - (blockDiff * 2000);
+      } else {
+        // For real-time events, use current time
+        timestamp = Date.now();
+      }
+      
       const baseEvent = {
         id: `${log.transactionHash}-${log.logIndex}`,
         transactionHash: log.transactionHash as `0x${string}`,
-        blockNumber: log.blockNumber || BigInt(0),
-        timestamp: Date.now(),
+        blockNumber: eventBlock,
+        timestamp,
       };
 
       if (type === 'mint' && log.args) {
@@ -91,14 +119,22 @@ export function useTransactionMonitor() {
   // Fetch past events
   const fetchPastEvents = useCallback(async () => {
     if (!publicClient || !contractAddress) {
+      console.log('[TransactionMonitor] Missing publicClient or contractAddress');
       setIsLoading(false);
       return;
     }
 
     try {
       setIsLoading(true);
+      setError(null);
       const currentBlock = await publicClient.getBlockNumber();
-      const fromBlock = currentBlock > BigInt(10000) ? currentBlock - BigInt(10000) : BigInt(0);
+      // Look back up to 45,000 blocks (~1 day on Base Sepolia with ~2s blocks)
+      // This respects RPC limits (most public RPCs limit to 50,000 blocks)
+      const fromBlock = currentBlock > BigInt(45000) ? currentBlock - BigInt(45000) : BigInt(0);
+      
+      console.log(`[TransactionMonitor] Fetching events from block ${fromBlock} to ${currentBlock} for contract ${contractAddress}`);
+      
+      const currentTime = Date.now();
 
       // Fetch different event types
       const [mintLogs, purchaseLogs, registerLogs] = await Promise.all([
@@ -126,17 +162,17 @@ export function useTransactionMonitor() {
       const nameMap: ArtistNameMap = {};
 
       mintLogs.forEach((log) => {
-        const event = processLog(log, 'mint');
+        const event = processLog(log, 'mint', currentBlock, currentTime);
         if (event) allEvents.push(event);
       });
 
       purchaseLogs.forEach((log) => {
-        const event = processLog(log, 'purchase');
+        const event = processLog(log, 'purchase', currentBlock, currentTime);
         if (event) allEvents.push(event);
       });
 
       registerLogs.forEach((log) => {
-        const event = processLog(log, 'register');
+        const event = processLog(log, 'register', currentBlock, currentTime);
         if (event) {
           allEvents.push(event);
           if (event.artistName) {
@@ -145,16 +181,22 @@ export function useTransactionMonitor() {
         }
       });
 
+      console.log(`[TransactionMonitor] Found ${mintLogs.length} mints, ${purchaseLogs.length} purchases, ${registerLogs.length} registrations`);
+      
       // Sort by block number descending
       allEvents.sort((a, b) => Number(b.blockNumber - a.blockNumber));
 
       const trimmed = allEvents.slice(0, MAX_EVENTS);
       const enriched = applyArtistNames(trimmed, nameMap);
 
+      console.log(`[TransactionMonitor] Total events: ${allEvents.length}, displaying: ${enriched.length}`);
+      
       setArtistNames(nameMap);
       setEvents(enriched);
-    } catch (error) {
-      console.error('Error fetching past events:', error);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      console.error('[TransactionMonitor] Error fetching past events:', err);
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -261,6 +303,7 @@ export function useTransactionMonitor() {
   return {
     events,
     isLoading,
+    error,
     refresh: fetchPastEvents,
   };
 }

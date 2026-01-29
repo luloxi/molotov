@@ -1,17 +1,19 @@
 .form {
-  max-width: 560px;
+  max-width: 520px;
   margin: 0 auto;
-  padding: 32px;
-  background: var(--card-bg, #1a1a2e);
-  border-radius: 20px;
+  padding: 28px 24px 32px;
+  background: var(--card-bg, #fff);
+  border-radius: 14px;
+  border: 1px solid var(--border-light, rgba(0, 0, 0, 0.06));
 }
 
 .title {
   margin: 0 0 24px;
-  font-size: 1.5rem;
+  font-size: 1.375rem;
   font-weight: 700;
-  color: var(--text-primary, #fff);
+  color: var(--text-primary, #111);
   text-align: center;
+  letter-spacing: -0.02em;
 }
 
 .uploadSection {
@@ -33,30 +35,60 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  padding: 48px;
-  background: var(--input-bg, #0d0d1a);
-  border: 2px dashed var(--border, #333);
-  border-radius: 16px;
-  color: var(--text-secondary, #888);
+  gap: 10px;
+  padding: 40px 24px;
+  background: var(--bg-secondary, #f5f5f7);
+  border: 2px dashed var(--border, #e0e0e0);
+  border-radius: 12px;
+  color: var(--text-muted, #999);
+  transition: all 0.2s ease;
+}
+
+.uploadPlaceholder:hover {
+  border-color: var(--accent, #2563eb);
+  background: var(--accent-subtle, rgba(37, 99, 235, 0.04));
+}
+
+.uploadPlaceholder.dragging {
+  border-color: var(--accent, #2563eb);
+  border-style: solid;
+  background: var(--accent-subtle, rgba(37, 99, 235, 0.08));
+  transform: scale(1.01);
 }
 
 .fileTypes {
-  font-size: 0.75rem;
-  color: var(--text-muted, #666);
+  font-size: 0.6875rem;
+  color: var(--text-muted, #999);
+}
+
+.dragHint {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .dragHint {
+    display: block;
+  }
 }
 
 .previewContainer {
   position: relative;
-  border-radius: 16px;
+  border-radius: 12px;
   overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.previewContainer.dragging {
+  outline: 3px solid var(--accent, #2563eb);
+  outline-offset: 2px;
+  transform: scale(1.01);
 }
 
 .preview {
   width: 100%;
-  max-height: 400px;
+  max-height: 360px;
   object-fit: contain;
-  background: var(--input-bg, #0d0d1a);
+  background: var(--bg-secondary, #f5f5f7);
 }
 
 .changeText {
@@ -64,78 +96,112 @@
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 12px;
-  background: rgba(0, 0, 0, 0.7);
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
   text-align: center;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   color: white;
+  font-weight: 500;
 }
 
 .fileInput {
   display: none;
 }
 
+.ipfsNote {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 12px 0 0;
+  padding: 10px 16px;
+  font-size: 0.8125rem;
+  color: var(--text-muted, #888);
+  text-align: center;
+}
+
+.ipfsIcon {
+  color: var(--accent, #6366f1);
+  font-size: 0.75rem;
+}
+
+.ipfsNote strong {
+  color: var(--text-primary, #fff);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.ipfsSubtext {
+  opacity: 0.6;
+  font-size: 0.75rem;
+}
+
 .field {
-  margin-bottom: 16px;
+  margin-bottom: 18px;
 }
 
 .label {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 6px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--text-secondary, #888);
+  margin-bottom: 8px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-secondary, #555);
 }
 
 .label input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
-  accent-color: var(--accent, #6366f1);
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent, #2563eb);
 }
 
 .input {
   width: 100%;
-  padding: 12px 16px;
-  background: var(--input-bg, #0d0d1a);
-  border: 1px solid var(--border, #333);
-  border-radius: 10px;
-  color: var(--text-primary, #fff);
-  font-size: 1rem;
-  transition: border-color 0.2s ease;
+  padding: 12px 14px;
+  background: var(--bg-secondary, #f5f5f7);
+  border: 1px solid var(--border, #e0e0e0);
+  border-radius: 8px;
+  color: var(--text-primary, #111);
+  font-size: 0.9375rem;
+  transition: all 0.2s ease;
 }
 
 .input:focus {
   outline: none;
-  border-color: var(--accent, #6366f1);
+  border-color: var(--accent, #2563eb);
+  background: var(--card-bg, #fff);
+  box-shadow: 0 0 0 3px var(--accent-light, rgba(37, 99, 235, 0.1));
 }
 
 .input::placeholder {
-  color: var(--text-muted, #666);
+  color: var(--text-muted, #999);
 }
 
 .textarea {
   width: 100%;
-  padding: 12px 16px;
-  background: var(--input-bg, #0d0d1a);
-  border: 1px solid var(--border, #333);
-  border-radius: 10px;
-  color: var(--text-primary, #fff);
-  font-size: 1rem;
+  padding: 12px 14px;
+  background: var(--bg-secondary, #f5f5f7);
+  border: 1px solid var(--border, #e0e0e0);
+  border-radius: 8px;
+  color: var(--text-primary, #111);
+  font-size: 0.9375rem;
   resize: vertical;
   min-height: 80px;
   font-family: inherit;
-  transition: border-color 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .textarea:focus {
   outline: none;
-  border-color: var(--accent, #6366f1);
+  border-color: var(--accent, #2563eb);
+  background: var(--card-bg, #fff);
+  box-shadow: 0 0 0 3px var(--accent-light, rgba(37, 99, 235, 0.1));
 }
 
 .textarea::placeholder {
-  color: var(--text-muted, #666);
+  color: var(--text-muted, #999);
 }
 
 .row {
@@ -165,10 +231,50 @@
   color: var(--accent, #6366f1);
 }
 
+.categoriesSection {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border, #e0e0e0);
+}
+
+.categoryGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.categoryChip {
+  padding: 8px 14px;
+  background: var(--bg-secondary, #f5f5f7);
+  border: 1px solid var(--border, #e0e0e0);
+  border-radius: 20px;
+  color: var(--text-secondary, #555);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.categoryChip:hover {
+  border-color: var(--accent, #2563eb);
+  color: var(--accent, #2563eb);
+}
+
+.categorySelected {
+  background: var(--text-primary, #111);
+  border-color: var(--text-primary, #111);
+  color: var(--bg-primary, #fff);
+}
+
+.loadingText {
+  font-size: 0.8125rem;
+  color: var(--text-muted, #999);
+}
+
 .attributesSection {
   margin-top: 24px;
   padding-top: 24px;
-  border-top: 1px solid var(--border, #333);
+  border-top: 1px solid var(--border, #e0e0e0);
 }
 
 .sectionTitle {
@@ -241,77 +347,139 @@
 
 .error {
   margin: 16px 0 0;
-  padding: 12px;
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  padding: 12px 14px;
+  background: var(--error-light, rgba(220, 38, 38, 0.08));
+  border: 1px solid rgba(220, 38, 38, 0.2);
   border-radius: 8px;
-  color: #ef4444;
-  font-size: 0.875rem;
+  color: var(--error, #dc2626);
+  font-size: 0.8125rem;
 }
 
 .progress {
   margin: 16px 0 0;
-  padding: 12px;
-  background: rgba(99, 102, 241, 0.1);
-  border: 1px solid rgba(99, 102, 241, 0.3);
+  padding: 12px 14px;
+  background: var(--accent-light, rgba(37, 99, 235, 0.08));
+  border: 1px solid rgba(37, 99, 235, 0.2);
   border-radius: 8px;
-  color: var(--accent, #6366f1);
-  font-size: 0.875rem;
+  color: var(--accent, #2563eb);
+  font-size: 0.8125rem;
   text-align: center;
+  font-weight: 500;
 }
 
 .submitButton {
   width: 100%;
   margin-top: 24px;
-  padding: 16px 24px;
-  background: var(--accent, #6366f1);
+  padding: 14px 24px;
+  background: var(--text-primary, #111);
   border: none;
-  border-radius: 12px;
-  color: white;
-  font-size: 1rem;
+  border-radius: 10px;
+  color: var(--bg-primary, #fff);
+  font-size: 0.9375rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  letter-spacing: -0.01em;
 }
 
 .submitButton:hover:not(:disabled) {
-  background: var(--accent-hover, #4f46e5);
+  background: var(--accent, #2563eb);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.25);
 }
 
 .submitButton:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
 .success {
   text-align: center;
-  padding: 48px 32px;
-  background: var(--card-bg, #1a1a2e);
-  border-radius: 20px;
-  color: var(--success, #22c55e);
+  padding: 28px 24px 32px;
+  background: var(--card-bg, #fff);
+  border-radius: 14px;
+  border: 1px solid var(--border-light, rgba(0, 0, 0, 0.06));
+  max-width: 520px;
+  margin: 0 auto;
+  overflow: hidden;
 }
 
-.success h2 {
-  margin: 16px 0 8px;
-  color: var(--text-primary, #fff);
+.successArtwork {
+  width: 100%;
+  margin: 0 0 20px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--bg-secondary, #f5f5f7);
+}
+
+.successImage {
+  width: 100%;
+  max-height: 300px;
+  object-fit: contain;
+  display: block;
+}
+
+.successBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: var(--success-light, rgba(5, 150, 105, 0.1));
+  border-radius: 20px;
+  color: var(--success, #059669);
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.successBadge svg {
+  color: var(--success, #059669);
+}
+
+.successTitle {
+  margin: 0 0 4px;
+  color: var(--text-primary, #111);
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 .success p {
-  margin: 0 0 20px;
-  color: var(--text-secondary, #888);
+  margin: 0 0 28px;
+  color: var(--text-muted, #999);
+  font-size: 0.8125rem;
+}
+
+.viewArtworkLink {
+  display: inline-block;
+  padding: 12px 32px;
+  background: var(--text-primary, #111);
+  border-radius: 8px;
+  color: var(--bg-primary, #fff);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  letter-spacing: -0.01em;
+}
+
+.viewArtworkLink:hover {
+  background: var(--accent, #2563eb);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.25);
 }
 
 .txLink {
-  display: inline-block;
-  padding: 12px 24px;
-  background: var(--accent, #6366f1);
-  border-radius: 8px;
-  color: white;
+  display: block;
+  margin-top: 16px;
+  padding: 0;
+  background: none;
+  color: var(--text-muted, #666);
   text-decoration: none;
-  font-weight: 500;
-  transition: background 0.2s ease;
+  font-size: 0.75rem;
+  transition: color 0.2s ease;
 }
 
 .txLink:hover {
-  background: var(--accent-hover, #4f46e5);
+  color: var(--accent, #2563eb);
 }

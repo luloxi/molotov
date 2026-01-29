@@ -1,0 +1,78 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model ArtworkStats {
+  id        String   @id // tokenId as string
+  views     Int      @default(0)
+  likes     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  artworkLikes      ArtworkLike[]
+  artworkViews      ArtworkView[]
+  artworkCategories ArtworkCategory[]
+}
+
+model ArtworkLike {
+  id        String   @id @default(cuid())
+  tokenId   String
+  userId    String   // wallet address or farcaster user id
+  createdAt DateTime @default(now())
+
+  artwork   ArtworkStats @relation(fields: [tokenId], references: [id], onDelete: Cascade)
+
+  @@unique([tokenId, userId])
+  @@index([tokenId])
+  @@index([userId])
+}
+
+model ArtworkView {
+  id        String   @id @default(cuid())
+  tokenId   String
+  userId    String?  // optional - can be anonymous
+  ipHash    String?  // hashed IP for anonymous rate limiting
+  createdAt DateTime @default(now())
+
+  artwork   ArtworkStats @relation(fields: [tokenId], references: [id], onDelete: Cascade)
+
+  @@index([tokenId])
+  @@index([ipHash])
+}
+
+// Categories for organizing artworks
+model Category {
+  id          String   @id @default(cuid())
+  name        String   @unique // e.g., "Abstract", "Photography", "Digital Art"
+  slug        String   @unique // URL-friendly version
+  description String?
+  color       String?  // Optional color for UI display (hex)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  artworks ArtworkCategory[]
+
+  @@index([slug])
+}
+
+// Many-to-many relation between artworks and categories
+model ArtworkCategory {
+  id         String   @id @default(cuid())
+  tokenId    String
+  categoryId String
+  createdAt  DateTime @default(now())
+
+  artwork  ArtworkStats @relation(fields: [tokenId], references: [id], onDelete: Cascade)
+  category Category     @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([tokenId, categoryId])
+  @@index([tokenId])
+  @@index([categoryId])
+}

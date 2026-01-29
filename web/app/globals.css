@@ -1,44 +1,46 @@
 :root {
-  /* Colors - Light theme (default) */
-  --bg-primary: #ffffff;
-  --bg-secondary: #f4f4f7;
-  --nav-bg: rgba(255, 237, 213, 0.96); /* light orange */
+  /* Colors - Light theme (default) - Gallery aesthetic */
+  --bg-primary: #fafafa;
+  --bg-secondary: #f0f0f2;
+  --nav-bg: rgba(255, 255, 255, 0.92);
   --card-bg: #ffffff;
-  --card-hover: #eef0ff;
-  --input-bg: #f9f9fb;
+  --card-hover: #f8f8fc;
+  --input-bg: #f5f5f7;
   
-  --text-primary: #0b0b15;
-  --text-secondary: #4a4a66;
-  --text-muted: #8a8aa5;
+  --text-primary: #111111;
+  --text-secondary: #555555;
+  --text-muted: #999999;
   
-  --border: #d4d4e0;
-  --border-light: #e4e4f0;
+  --border: #e0e0e0;
+  --border-light: rgba(0, 0, 0, 0.06);
   
-  --accent: #6366f1;
-  --accent-hover: #4f46e5;
-  --accent-light: rgba(99, 102, 241, 0.12);
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --accent-light: rgba(37, 99, 235, 0.1);
+  --accent-subtle: rgba(37, 99, 235, 0.06);
   
-  --success: #16a34a;
-  --success-light: rgba(22, 163, 74, 0.12);
+  --success: #059669;
+  --success-light: rgba(5, 150, 105, 0.1);
   
-  --warning: #eab308;
-  --warning-light: rgba(234, 179, 8, 0.14);
+  --warning: #d97706;
+  --warning-light: rgba(217, 119, 6, 0.1);
   
   --error: #dc2626;
-  --error-light: rgba(220, 38, 38, 0.14);
+  --error-light: rgba(220, 38, 38, 0.1);
   
-  --skeleton-bg: #e5e7f3;
-  --skeleton-shine: #f4f5fd;
+  --skeleton-bg: #e8e8ec;
+  --skeleton-shine: #f5f5f8;
   
-  /* Gradients */
-  --gradient-primary: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
-  --gradient-hero: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+  /* Gradients - Refined for elegance */
+  --gradient-primary: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+  --gradient-hero: linear-gradient(135deg, #1e1e1e 0%, #2d2d2d 100%);
+  --gradient-subtle: linear-gradient(180deg, rgba(0,0,0,0.02) 0%, rgba(0,0,0,0) 100%);
   
-  /* Shadows */
-  --shadow-sm: 0 2px 6px rgba(15, 23, 42, 0.08);
-  --shadow-md: 0 4px 14px rgba(15, 23, 42, 0.12);
-  --shadow-lg: 0 10px 30px rgba(15, 23, 42, 0.16);
-  --shadow-accent: 0 10px 28px rgba(99, 102, 241, 0.28);
+  /* Shadows - Subtle and refined */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.08), 0 4px 8px rgba(0, 0, 0, 0.04);
+  --shadow-accent: 0 8px 24px rgba(37, 99, 235, 0.2);
   
   /* Typography */
   --font-sans: var(--font-dm-sans), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
@@ -52,52 +54,58 @@
   /* Border radius */
   --radius-sm: 6px;
   --radius-md: 10px;
-  --radius-lg: 16px;
+  --radius-lg: 14px;
   --radius-xl: 20px;
   --radius-full: 9999px;
+  
+  /* Gallery-specific spacing */
+  --section-gap: 48px;
+  --content-gap: 24px;
 }
 
 [data-theme='dark'] {
-  /* Colors - Dark theme (matches previous design) */
-  --bg-primary: #050712;
-  --bg-secondary: #0b1020;
-  --nav-bg: rgba(200, 100, 40, 0.96); /* brighter orange */
-  --card-bg: #1a1a2e;
-  --card-hover: #252540;
-  --input-bg: #0d0d1a;
+  /* Colors - Dark theme - Sophisticated gallery */
+  --bg-primary: #0a0a0b;
+  --bg-secondary: #111113;
+  --nav-bg: rgba(12, 12, 14, 0.94);
+  --card-bg: #161618;
+  --card-hover: #1c1c1f;
+  --input-bg: #0f0f11;
   
-  --text-primary: #ffffff;
-  --text-secondary: #a0a0b0;
-  --text-muted: #666680;
+  --text-primary: #f5f5f5;
+  --text-secondary: #a0a0a5;
+  --text-muted: #666669;
   
-  --border: #2a2a40;
-  --border-light: #3a3a50;
+  --border: #252528;
+  --border-light: rgba(255, 255, 255, 0.06);
   
-  --accent: #6366f1;
-  --accent-hover: #4f46e5;
-  --accent-light: rgba(99, 102, 241, 0.15);
+  --accent: #3b82f6;
+  --accent-hover: #2563eb;
+  --accent-light: rgba(59, 130, 246, 0.12);
+  --accent-subtle: rgba(59, 130, 246, 0.06);
   
-  --success: #22c55e;
-  --success-light: rgba(34, 197, 94, 0.15);
+  --success: #10b981;
+  --success-light: rgba(16, 185, 129, 0.12);
   
-  --warning: #fbbf24;
-  --warning-light: rgba(251, 191, 36, 0.15);
+  --warning: #f59e0b;
+  --warning-light: rgba(245, 158, 11, 0.12);
   
   --error: #ef4444;
-  --error-light: rgba(239, 68, 68, 0.15);
+  --error-light: rgba(239, 68, 68, 0.12);
   
-  --skeleton-bg: #2a2a4e;
-  --skeleton-shine: #3a3a5e;
+  --skeleton-bg: #1e1e22;
+  --skeleton-shine: #2a2a30;
   
   /* Gradients */
-  --gradient-primary: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
-  --gradient-hero: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+  --gradient-primary: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  --gradient-hero: linear-gradient(135deg, #3b82f6 0%, #a855f7 50%, #ec4899 100%);
+  --gradient-subtle: linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0) 100%);
   
   /* Shadows */
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.15);
-  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.2);
-  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.3);
-  --shadow-accent: 0 8px 24px rgba(99, 102, 241, 0.3);
+  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.25);
+  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.35);
+  --shadow-accent: 0 8px 24px rgba(59, 130, 246, 0.25);
 }
 
 * {
@@ -212,86 +220,93 @@ select {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 24px;
-  background: rgba(10, 10, 20, 0.85);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--border);
+  padding: 12px 20px;
+  background: var(--nav-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border-light);
 }
 
 .navLogo {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 1.25rem;
+  font-size: 1.125rem;
   font-weight: 700;
   color: var(--text-primary);
+  letter-spacing: -0.02em;
 }
 
 .navLogo span {
-  background: var(--gradient-hero);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--text-primary);
 }
 
 .navLinks {
   display: flex;
   align-items: center;
-  gap: 32px;
+  gap: 6px;
 }
 
 .navLink {
-  font-size: 0.875rem;
+  padding: 8px 16px;
+  font-size: 0.8125rem;
   font-weight: 500;
   color: var(--text-secondary);
-  transition: color var(--transition-fast);
+  transition: all var(--transition-fast);
+  border-radius: 8px;
 }
 
 .navLink:hover {
   color: var(--text-primary);
+  background: var(--accent-subtle);
 }
 
 .navLink.active {
   color: var(--accent);
+  background: var(--accent-light);
+  font-weight: 600;
 }
 
 .navActions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
 }
 
 .connectButton {
-  padding: 10px 20px;
-  background: var(--accent);
+  padding: 8px 16px;
+  background: var(--text-primary);
   border: none;
-  border-radius: var(--radius-md);
-  color: white;
-  font-size: 0.875rem;
+  border-radius: 8px;
+  color: var(--bg-primary);
+  font-size: 0.8125rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background var(--transition-fast);
+  transition: all var(--transition-fast);
+  letter-spacing: -0.01em;
 }
 
 .connectButton:hover {
-  background: var(--accent-hover);
+  background: var(--accent);
+  transform: translateY(-1px);
 }
 
 .walletInfo {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 16px;
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  font-size: 0.875rem;
+  padding: 7px 14px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  font-size: 0.8125rem;
   color: var(--text-primary);
+  font-weight: 500;
 }
 
 .walletDot {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   background: var(--success);
   border-radius: 50%;
 }
@@ -348,7 +363,7 @@ select {
 /* Mobile responsive */
 @media (max-width: 768px) {
   .nav {
-    padding: 12px 16px;
+    padding: 10px 16px;
   }
   
   .navLinks {
@@ -357,5 +372,9 @@ select {
   
   .container {
     padding: 0 16px;
+  }
+  
+  .navLogo {
+    font-size: 1rem;
   }
 }

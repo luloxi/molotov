@@ -114,9 +114,24 @@ export interface GalleryFilters {
   priceMin?: string;
   priceMax?: string;
   mediaType?: string[];
+  category?: string[]; // category slugs or IDs
   sortBy: 'newest' | 'oldest' | 'price_asc' | 'price_desc';
   onlyForSale: boolean;
   artist?: `0x${string}`;
+}
+
+// Category types
+export interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string | null;
+  color?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  _count?: {
+    artworks: number;
+  };
 }
 
 // IPFS upload response
